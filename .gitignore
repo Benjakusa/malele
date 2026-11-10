@@ -1,0 +1,43 @@
+# Android
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+local.properties
+.gradle/
+build/
+.idea/
+*.iml
+.kotlin/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node (future web)
+node_modules/
+
+# OS / editor
+.DS_Store
+*.swp
+.vscode/
+
+# Secrets
+*.pem
+*.key
+secrets/
+
+# Project-specific
+*.malele
+storage/
+uploads/
