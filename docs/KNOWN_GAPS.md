@@ -41,7 +41,7 @@ Things Malele **does not have yet**, **cannot verify yet**, or has **deferred**.
 
 | Gap | Impact | Mitigation |
 | --- | --- | --- |
-| Package ID `com.malele.app` is placeholder | Cannot publish until replaced | Replaced before Play Store upload (ADR-004) |
+| Package ID — final `com.benjakusa.malele` chosen | **Resolved at Phase 3 start** | No action needed |
 | No HTTPS in local dev | Android may need `network_security_config.xml` exception | Documented in Phase 3 |
 | Push notifications not yet wired | Phase 1 uses polling only | FCM in Phase 4 or 5 |
 | No app-level crash reporting (Sentry/Crashlytics) | Crashes invisible in beta | Add in Phase 3 |

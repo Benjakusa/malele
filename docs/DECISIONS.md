@@ -40,12 +40,12 @@ Architecture Decision Records (ADRs). Each decision: context, choice, alternativ
 
 ---
 
-## ADR-004 — Package ID `com.malele.app` (placeholder)
+## ADR-004 — Package ID: `com.benjakusa.malele` (final)
 
 **Date:** Phase 0.
 **Status:** Accepted, pending publish.
 **Context:** Application ID cannot be changed after first Play Store publish.
-**Decision:** Use `com.malele.app` for development. **Before first Play Store upload**, replace with a domain the project controls (e.g., `com.<owner>.malele`).
+**Decision:** **Final package ID: `com.benjakusa.malele`.** Chosen Phase 3 kickoff. The developer's name (`benjakusa`) is a namespace that does not require domain purchase, is unambiguous, and is permanent from the first Play Store upload.
 **Consequences:** Tracked as pre-publish TODO in KNOWN_GAPS. Kotlin root package `com.malele` can stay — only `applicationId` in `app/build.gradle.kts` needs the change.
 
 ---
