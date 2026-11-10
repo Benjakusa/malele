@@ -7,6 +7,7 @@ from app.providers.base import (
     ProviderCapabilities,
     ProviderKind,
 )
+from app.providers.music.elevenlabs import ElevenLabsMusicProvider
 from app.providers.music.mock import MockMusicProvider
 
 
@@ -94,5 +95,8 @@ def get_registry() -> ProviderRegistry:
     if _registry is None:
         _registry = ProviderRegistry()
         _registry.register(MockMusicProvider())
-        # ElevenLabs and fal adapters are wired in Steps 2 and 4.
+        # ElevenLabs adapter — used when ELEVENLABS_ENABLED=true
+        if _settings.ELEVENLABS_API_KEY:
+            _registry.register(ElevenLabsMusicProvider())
+        # fal adapter — added in Step 4.
     return _registry
