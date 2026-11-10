@@ -1,0 +1,73 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: malele-postgres
+    environment:
+      POSTGRES_USER: malele
+      POSTGRES_PASSWORD: malele
+      POSTGRES_DB: malele
+    ports:
+      - "5432:5432"
+    volumes:
+      - malele_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U malele -d malele"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  valkey:
+    image: valkey/valkey:8-alpine
+    container_name: malele-valkey
+    ports:
+      - "6379:6379"
+    volumes:
+      - malele_valkey:/data
+    command: ["valkey-server", "--save", "60", "1", "--loglevel", "warning"]
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: malele-api
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://malele:malele@postgres:5432/malele
+      REDIS_URL: redis://valkey:6379/0
+      CELERY_BROKER_URL: redis://valkey:6379/1
+      CELERY_RESULT_BACKEND: redis://valkey:6379/2
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      postgres: { condition: service_healthy }
+      valkey: { condition: service_healthy }
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: malele-worker
+    command: ["celery", "-A", "app.workers.celery_app.celery_app", "worker", "--loglevel=INFO", "--concurrency=2"]
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://malele:malele@postgres:5432/malele
+      REDIS_URL: redis://valkey:6379/0
+      CELERY_BROKER_URL: redis://valkey:6379/1
+      CELERY_RESULT_BACKEND: redis://valkey:6379/2
+    volumes:
+      - .:/app
+    depends_on:
+      postgres: { condition: service_healthy }
+      valkey: { condition: service_healthy }
+
+volumes:
+  malele_pg:
+  malele_valkey:
