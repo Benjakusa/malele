@@ -111,3 +111,32 @@ At the end of every phase:
 3. **Never** silently drop a gap — if superseded, mark it `[SUPERSEDED by ADR-NNN]`.
 
 **End of KNOWN_GAPS.md (Phase 0).**
+
+---
+
+## 9. Phase 2 gaps (added Phase 2 completion)
+
+The following were planned for Phase 2 but deferred:
+
+| Gap | Impact | Planned resolution |
+| --- | --- | --- |
+| Live ElevenLabs song generation not run | Real API integration unverified; only contract tests pass | Phase 3 or 4 acceptance |
+| Live fal.ai generation not run | fal balance $0 | After topping up |
+| Live Anthropic lyrics generation not run | Real Claude outputs unverified (only mocked tool_use tested) | Phase 3 or 4 |
+| African genre fidelity not assessed | **Product identity risk** — cannot claim go/no-go | Requires live listening (Phase 3) |
+| African language lyric quality not assessed | Swahili/Luo/Lingala/Kikuyu output unverified | Requires native speaker review |
+| Provider cost per song not measured | Cost model is estimate-only | Add tracking to `CreditTransaction.metadata` when live |
+| ElevenLabs inpainting not exercised | Extend/replace-section only contract-tested | Phase 6 |
+
+**These are real gaps, not minor ones.** Phase 2's acceptance criteria from `PLAN.md` §5 are **NOT** fully met:
+
+- ❌ One real song through ElevenLabs — **not done**
+- ❌ One real song through fal — **not done** (no balance)
+- ❌ One real lyrics generation through Anthropic — **not done**
+- ❌ African genre test results — **not done**
+- ✅ Instrumental routing, capability selection, fallback logic, credit flow — **all proven via contract tests + mock provider**
+
+**Impact on downstream phases:** Phase 3 (Android foundation) does not require live providers — the app authenticates, navigates, and displays data from the API. The live test can and should happen **before Phase 4** (Create experience), because Phase 4 is the first phase that needs real song output.
+
+**Verdict:** Phase 2 code complete, but **not approved** for Phase 4 start without a live acceptance test.
+

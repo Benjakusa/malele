@@ -1,7 +1,7 @@
 # Implementation Status
 
 **Last updated:** Phase 0 complete.
-**Overall status:** Phase 0 (planning) done. Phase 1 (backend foundation) not started.
+**Overall status:** Phases 0–2 code complete. Live provider acceptance tests deferred. Awaiting Phase 3.
 
 This is the canonical status board. Updated at the end of every phase. The Phase 0 completion report (below) is the current authoritative status.
 
@@ -13,7 +13,7 @@ This is the canonical status board. Updated at the end of every phase. The Phase
 | --- | --- | --- | --- | --- |
 | 0 | ✅ Complete | Yes | Yes | 11 docs pending review |
 | 1 | ⏳ Not started | — | — | Awaiting user approval of Phase 0 |
-| 2 | ⏳ Not started | — | — | — |
+| 2 | ✅ Code complete (live tests deferred) | Phase 2 | Phase 2 | 12 contract + 14 integration + 3 prompt tests |
 | 3 | ⏳ Not started | — | — | — |
 | 4 | ⏳ Not started | — | — | — |
 | 5 | ⏳ Not started | — | — | — |
@@ -62,6 +62,42 @@ This is the canonical status board. Updated at the end of every phase. The Phase
 - Any FastAPI, SQLAlchemy, or Python application code
 - Any real provider API calls (no keys yet)
 - Any database schema or migrations
+
+
+---
+
+## Phase 2 — Real AI Provider Integrations (CODE COMPLETE)
+
+### Delivered
+
+- `ElevenLabsMusicProvider` — `/v1/music` adapter, inpainting support, MP3 output
+- `FalMusicProvider` — queue API adapter, model configurable, `is_instrumental` flag
+- `AnthropicLyricsProvider` — lyrics generation via tool_use, prompt enhancement
+- `ProviderRegistry` — capability-based selection, `preferred_provider` support
+- `PromptService` — enhancer + lyrics via Anthropic
+- `/v1/prompt/enhance`, `/v1/lyrics/generate` endpoints
+- 12 contract tests (3 ElevenLabs + 4 fal + 5 Anthropic)
+- 3 prompt integration tests (mocked Anthropic)
+- African genre test harness (`scripts/african_genre_test.py`, gated)
+
+### Test status
+
+29/29 passing: 14 integration (auth + generation) + 12 contract + 3 prompt.
+**Zero live provider calls made in Phase 2.** All contract tests mock the HTTP layer.
+
+### Acceptance criteria status
+
+| Criterion | Status | Notes |
+| --- | --- | --- |
+| One real song through ElevenLabs end-to-end | ❌ Not run | Code correct per contract tests |
+| One real song through fal end-to-end | ❌ Not run | fal balance $0 |
+| One real lyrics generation through Anthropic | ❌ Not run | Code correct per contract tests |
+| Instrumental-only routing | ✅ Passes | Via mock provider |
+| Fallback on simulated 500 | ✅ Code path | Via mock provider |
+| African genre test results documented | ❌ Deferred | Harness written; not run |
+| Verdict for product identity | ❌ Not assessed | Requires live listening |
+
+**Recommendation: run acceptance tests in Phase 3 (Android) once the client can play audio — debugging on a real player is cheaper than on `/tmp`.**
 
 ---
 
