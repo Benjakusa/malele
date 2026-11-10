@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.errors import install_error_handlers
 from app.api.routes.auth import me_router, router as auth_router
 from app.api.routes.generations import router as generations_router
+from app.api.routes.prompts import router as prompts_router
 from app.config.settings import get_settings
 
 
@@ -53,6 +54,7 @@ def create_app() -> FastAPI:
     app.include_router(auth_router)
     app.include_router(me_router)
     app.include_router(generations_router)
+    app.include_router(prompts_router)
 
     @app.get("/health", tags=["meta"])
     async def health() -> dict[str, str]:
