@@ -34,7 +34,7 @@ class MockMusicProvider(MusicProvider):
             inpainting=False,
             streaming=False,
             stems=False,
-            max_duration_seconds=30,
+            max_duration_seconds=600,
         )
 
     async def submit(self, request: GenerationRequest) -> ProviderJobRef:

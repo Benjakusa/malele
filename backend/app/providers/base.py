@@ -30,7 +30,17 @@ class GenerationRequest:
     lyrics: str | None = None
     duration_seconds: int = 120
     language: str | None = None
+    preferred_provider: "ProviderKind | None" = None
     metadata: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class ProviderCost:
+    """Cost recorded when a provider call succeeds. Flows into CreditTransaction.metadata."""
+    provider: ProviderKind
+    amount_usd: float
+    credits_charged: int
+    detail: str = ""
 
 
 @dataclass

@@ -10,8 +10,9 @@ from app.providers.base import (
     GenerationRequest,
     ProviderJobRef,
     ProviderJobState,
+    ProviderKind,
 )
-from app.providers.music.mock import MockMusicProvider
+from app.providers.registry import get_registry
 
 
 _settings = get_settings()
@@ -24,16 +25,22 @@ class GenerationError(Exception):
         self.message = message
 
 
-_mock_provider_instance: MockMusicProvider | None = None
+async def _select_provider(request: GenerationRequest):
+    """Ask the registry for a provider that satisfies the request."""
+    registry = get_registry()
+    order = None
+    if request.preferred_provider is not None:
+        order = [request.preferred_provider, ProviderKind.ELEVENLABS, ProviderKind.FAL, ProviderKind.MOCK]
+    return await registry.select(request, preferred_order=order)
 
 
-def _get_provider() -> MockMusicProvider:
-    # Phase 1: always mock. Phase 2 will add provider router.
-    # Singleton so its in-memory job store persists between submit and poll calls.
-    global _mock_provider_instance
-    if _mock_provider_instance is None:
-        _mock_provider_instance = MockMusicProvider()
-    return _mock_provider_instance
+def _get_provider_by_kind(kind: ProviderKind):
+    """Return the live provider instance for a given kind (used during polling)."""
+    registry = get_registry()
+    provider = registry.get(kind)
+    if provider is None:
+        raise GenerationError("PROVIDER_NOT_FOUND", f"Provider {kind.value} is not registered")
+    return provider
 
 
 async def submit(
@@ -82,7 +89,6 @@ async def submit(
         await db.rollback()
         raise GenerationError(e.code, e.message) from e
 
-    provider = _get_provider()
     req = GenerationRequest(
         prompt=prompt,
         genre=genre,
@@ -92,6 +98,13 @@ async def submit(
         duration_seconds=duration_seconds,
         language=language,
     )
+
+    try:
+        provider = await _select_provider(req)
+    except Exception as e:
+        await ledger.refund_reserved(db, job_id=job_id)
+        await db.rollback()
+        raise GenerationError("NO_PROVIDER_AVAILABLE", str(e)) from e
 
     try:
         ref: ProviderJobRef = await provider.submit(req)
@@ -120,7 +133,7 @@ async def poll_and_complete(db: AsyncSession, *, job_id: UUID) -> GenerationJob:
     if job.state in (JobState.COMPLETED, JobState.FAILED, JobState.CANCELLED):
         return job
 
-    provider = _get_provider()
+    provider = _get_provider_by_kind(ref_kind(job.provider))
     ref = ProviderJobRef(provider=ref_kind(job.provider), provider_job_id=job.provider_job_id or "")
     status = await provider.poll(ref)
 
