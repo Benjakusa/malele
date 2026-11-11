@@ -19,6 +19,7 @@ class GenerationRepository @Inject constructor(
     private val apiClient: ApiClient,
 ) {
     private val json = Json { ignoreUnknownKeys = true }
+    val lyricsApi get() = apiClient.lyricsApi
 
     suspend fun submit(
         prompt: String,

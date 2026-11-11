@@ -1,6 +1,9 @@
 package com.benjakusa.malele.ui.screens.create
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,18 +13,32 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.RadioButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 
@@ -43,12 +60,30 @@ val LANGUAGES = listOf(
     "sw" to "Swahili",
 )
 
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateScreen(
     viewModel: CreateViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
+    var showAudioSheet by remember { mutableStateOf(false) }
+    var showVoiceSheet by remember { mutableStateOf(false) }
+
+    // Placeholder sheets — coming soon
+    if (showAudioSheet) {
+        ComingSoonSheet(
+            title = "Add reference audio",
+            body = "Upload or record audio — the AI will use the style and energy of the audio to shape your song. Coming soon.",
+            onDismiss = { showAudioSheet = false },
+        )
+    }
+    if (showVoiceSheet) {
+        ComingSoonSheet(
+            title = "Choose or create a voice",
+            body = "Pick a preset voice, or enroll your own by recording 30 seconds of your voice reading a script. Coming soon.",
+            onDismiss = { showVoiceSheet = false },
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -56,79 +91,141 @@ fun CreateScreen(
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
     ) {
-        Text(
-            text = "Create a song",
-            style = MaterialTheme.typography.headlineLarge,
-            color = MaterialTheme.colorScheme.primary,
-        )
-        Spacer(Modifier.height(4.dp))
-        Text(
-            text = "Describe your idea, add sections, and control every instrument.",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-        )
-        Spacer(Modifier.height(24.dp))
+        // TOP: 2 buttons side by side
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            GlassButton(
+                text = "+ Audio",
+                onClick = { showAudioSheet = true },
+                modifier = Modifier.weight(1f),
+            )
+            GlassButton(
+                text = "+ Voice",
+                onClick = { showVoiceSheet = true },
+                modifier = Modifier.weight(1f),
+            )
+        }
+        Spacer(Modifier.height(20.dp))
 
-        // Prompt
-        SectionHeader("Describe your song")
-        OutlinedTextField(
-            value = state.prompt,
-            onValueChange = viewModel::setPrompt,
-            placeholder = { Text("A Benga love song with interlocking guitars and warm vocals") },
-            modifier = Modifier.fillMaxWidth().height(120.dp),
-            maxLines = 5,
-        )
-        Spacer(Modifier.height(24.dp))
-
-        // Genre
-        SectionHeader("Genre")
-        GenrePicker(
-            selected = state.genre,
-            onSelect = viewModel::setGenre,
-        )
-        Spacer(Modifier.height(24.dp))
-
-        // Vocals + Language row
-        Row(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.weight(1f)) {
-                SectionHeader("Vocals")
-                Row {
-                    LabeledRadio(
-                        label = "Vocals",
-                        selected = state.vocals,
-                        onClick = { viewModel.setVocals(true) },
-                    )
-                }
-                Row {
-                    LabeledRadio(
-                        label = "Instrumental",
-                        selected = state.instrumental,
-                        onClick = { viewModel.setVocals(false) },
-                    )
-                }
+        // Prompt (glass card)
+        GlassCard {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "Describe your song",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = state.prompt,
+                    onValueChange = viewModel::setPrompt,
+                    placeholder = { Text("A Benga love song with interlocking guitars and warm vocals") },
+                    modifier = Modifier.fillMaxWidth().height(120.dp),
+                    maxLines = 5,
+                )
             }
-            Column(modifier = Modifier.weight(1f)) {
-                SectionHeader("Language")
-                LANGUAGES.forEach { (code, label) ->
-                    Row {
-                        LabeledRadio(
-                            label = label,
-                            selected = state.language == code,
-                            onClick = { viewModel.setLanguage(code) },
+        }
+        Spacer(Modifier.height(16.dp))
+
+        // Genre (horizontal scroll)
+        GlassCard {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "Genre",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                Spacer(Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    AFRICAN_GENRES.forEach { genre ->
+                        FilterChip(
+                            selected = state.genre == genre.id,
+                            onClick = {
+                                viewModel.setGenre(if (state.genre == genre.id) null else genre.id)
+                            },
+                            label = { Text(genre.label) },
                         )
                     }
                 }
             }
         }
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(16.dp))
 
-        // Sections
+        // Vocals (horizontal scroll)
+        GlassCard {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "Vocals",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                Spacer(Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    FilterChip(
+                        selected = state.vocals,
+                        onClick = { viewModel.setVocals(true) },
+                        label = { Text("Vocals") },
+                    )
+                    FilterChip(
+                        selected = state.instrumental,
+                        onClick = { viewModel.setVocals(false) },
+                        label = { Text("Instrumental") },
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.height(16.dp))
+
+        // Language (horizontal scroll)
+        GlassCard {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "Language",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                Spacer(Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    LANGUAGES.forEach { (code, label) ->
+                        FilterChip(
+                            selected = state.language == code,
+                            onClick = { viewModel.setLanguage(code) },
+                            label = { Text(label) },
+                        )
+                    }
+                }
+            }
+        }
+        Spacer(Modifier.height(16.dp))
+
+        // Sections header
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            SectionHeader("Sections (${state.sections.size})")
+            Text(
+                text = "Sections (${state.sections.size})",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.primary,
+            )
             OutlinedButton(onClick = viewModel::addSection) {
                 Text("+ Add section")
             }
@@ -147,13 +244,15 @@ fun CreateScreen(
                     section = section,
                     onChange = { update -> viewModel.updateSection(section.id, update) },
                     onRemove = { viewModel.removeSection(section.id) },
+                    onWriteWithAi = { viewModel.writeLyricsForSection(section.id) },
+                    isWritingLyrics = state.lyricsLoadingSectionId == section.id,
                 )
                 Spacer(Modifier.height(12.dp))
             }
         }
         Spacer(Modifier.height(24.dp))
 
-        // Error + submit
+        // Error
         if (state.errorMessage != null) {
             Text(
                 text = state.errorMessage!!,
@@ -163,6 +262,7 @@ fun CreateScreen(
             Spacer(Modifier.height(8.dp))
         }
 
+        // Submit
         Button(
             onClick = viewModel::submit,
             enabled = !state.isLoading && state.prompt.isNotBlank(),
@@ -194,80 +294,82 @@ fun CreateScreen(
 }
 
 @Composable
-private fun SectionHeader(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.titleLarge,
-        color = MaterialTheme.colorScheme.primary,
-    )
-    Spacer(Modifier.height(8.dp))
+private fun GlassCard(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(20.dp),
+                ambientColor = Color.Black.copy(alpha = 0.4f),
+                spotColor = Color.Black.copy(alpha = 0.6f),
+            ),
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.55f),
+        tonalElevation = 0.dp,
+    ) {
+        content()
+    }
 }
 
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
-private fun GenrePicker(
-    selected: String?,
-    onSelect: (String?) -> Unit,
+private fun GlassButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        AFRICAN_GENRES.chunked(2).forEach { rowGenres ->
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                rowGenres.forEach { genre ->
-                    androidx.compose.material3.FilterChip(
-                        selected = selected == genre.id,
-                        onClick = {
-                            onSelect(if (selected == genre.id) null else genre.id)
-                        },
-                        label = { Text(genre.label) },
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-                if (rowGenres.size == 1) {
-                    Spacer(Modifier.weight(1f))
-                }
-            }
+    Surface(
+        onClick = onClick,
+        modifier = modifier
+            .height(56.dp)
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(16.dp),
+                ambientColor = Color.Black.copy(alpha = 0.4f),
+                spotColor = Color.Black.copy(alpha = 0.6f),
+            ),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.55f),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.primary,
+            )
         }
     }
 }
 
 @Composable
-private fun LabeledRadio(
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
+private fun ComingSoonSheet(
+    title: String,
+    body: String,
+    onDismiss: () -> Unit,
 ) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        androidx.compose.material3.RadioButton(
-            selected = selected,
-            onClick = onClick,
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(start = 4.dp),
-        )
-    }
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title) },
+        text = { Text(body) },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text("Got it") }
+        },
+    )
 }
 
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 private fun SectionEditor(
     section: SectionInput,
     onChange: ((SectionInput) -> SectionInput) -> Unit,
     onRemove: () -> Unit,
+    onWriteWithAi: () -> Unit,
+    isWritingLyrics: Boolean,
 ) {
-    androidx.compose.material3.Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = androidx.compose.material3.CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        ),
-    ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            // Header: section name + remove
+    GlassCard {
+        Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -275,61 +377,51 @@ private fun SectionEditor(
             ) {
                 OutlinedTextField(
                     value = section.name,
-                    onValueChange = { newName ->
-                        onChange { it.copy(name = newName) }
-                    },
+                    onValueChange = { newName -> onChange { it.copy(name = newName) } },
                     label = { Text("Section name") },
                     singleLine = true,
                     modifier = Modifier.weight(1f),
                 )
                 Spacer(Modifier.width(8.dp))
-                OutlinedButton(onClick = onRemove) {
-                    Text("Remove")
+                TextButton(onClick = onRemove) {
+                    Text("Remove", color = MaterialTheme.colorScheme.error)
                 }
             }
             Spacer(Modifier.height(8.dp))
 
-            // Duration
             Text(
                 text = "Duration: ${section.durationSeconds}s",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.primary,
             )
-            androidx.compose.material3.Slider(
+            Slider(
                 value = section.durationSeconds.toFloat(),
-                onValueChange = { secs ->
-                    onChange { it.copy(durationSeconds = secs.toInt()) }
-                },
+                onValueChange = { secs -> onChange { it.copy(durationSeconds = secs.toInt()) } },
                 valueRange = 5f..60f,
                 steps = 10,
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            // Instruments
             OutlinedTextField(
                 value = section.instruments,
                 onValueChange = { v -> onChange { it.copy(instruments = v) } },
                 label = { Text("Instruments") },
                 placeholder = { Text("heavy kick, congas, interlocking guitars, bass") },
-                singleLine = false,
                 maxLines = 2,
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(8.dp))
 
-            // Vocals
             OutlinedTextField(
                 value = section.vocals,
                 onValueChange = { v -> onChange { it.copy(vocals = v) } },
                 label = { Text("Vocals") },
                 placeholder = { Text("warm male tenor, group harmonies") },
-                singleLine = false,
                 maxLines = 2,
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(8.dp))
 
-            // Mood
             OutlinedTextField(
                 value = section.mood,
                 onValueChange = { v -> onChange { it.copy(mood = v) } },
@@ -340,7 +432,6 @@ private fun SectionEditor(
             )
             Spacer(Modifier.height(8.dp))
 
-            // Negative
             OutlinedTextField(
                 value = section.negative,
                 onValueChange = { v -> onChange { it.copy(negative = v) } },
@@ -349,12 +440,13 @@ private fun SectionEditor(
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(12.dp))
 
-            // Lyrics placeholder (editable textarea + AI button in next paste)
             LyricsField(
                 lyrics = section.lyrics,
                 onLyricsChange = { v -> onChange { it.copy(lyrics = v) } },
+                onWriteWithAi = onWriteWithAi,
+                isGenerating = isWritingLyrics,
             )
         }
     }

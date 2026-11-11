@@ -3,6 +3,7 @@ package com.benjakusa.malele.ui.screens.create
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.benjakusa.malele.data.network.dto.JobDto
+import com.benjakusa.malele.data.network.dto.LyricsGenerateRequest
 import com.benjakusa.malele.data.network.dto.SectionDto
 import com.benjakusa.malele.data.repository.GenerationRepository
 import com.benjakusa.malele.data.repository.GenerationResult
@@ -35,6 +36,7 @@ data class CreateUiState(
     val isLoading: Boolean = false,
     val submittedJob: JobDto? = null,
     val errorMessage: String? = null,
+    val lyricsLoadingSectionId: String? = null,
 )
 
 @HiltViewModel
@@ -81,6 +83,47 @@ class CreateViewModel @Inject constructor(
         _state.value = _state.value.copy(
             sections = _state.value.sections.filter { it.id != id }
         )
+    }
+
+    fun writeLyricsForSection(sectionId: String) {
+        val section = _state.value.sections.find { it.id == sectionId } ?: return
+        val prompt = _state.value.prompt
+        if (prompt.isBlank()) {
+            _state.value = _state.value.copy(errorMessage = "Please describe the song first")
+            return
+        }
+        viewModelScope.launch {
+            _state.value = _state.value.copy(lyricsLoadingSectionId = sectionId, errorMessage = null)
+            try {
+                val request = LyricsGenerateRequest(
+                    theme = "$prompt. Section: ${section.name}. Mood: ${section.mood.ifBlank { "unspecified" }}",
+                    genre = _state.value.genre,
+                    language = _state.value.language,
+                    mood = section.mood.ifBlank { null },
+                    sections = listOf(section.name),
+                )
+                val response = generationRepository.lyricsApi.generate(request)
+                if (response.isSuccessful) {
+                    val body = response.body()
+                    val lyricsText = body?.sections?.get(section.name) 
+                        ?: body?.sections?.values?.firstOrNull()
+                        ?: ""
+                    if (lyricsText.isNotBlank()) {
+                        updateSection(sectionId) { it.copy(lyrics = lyricsText) }
+                    } else {
+                        _state.value = _state.value.copy(errorMessage = "AI returned empty lyrics")
+                    }
+                } else {
+                    _state.value = _state.value.copy(
+                        errorMessage = "Lyrics AI failed: HTTP ${response.code()}"
+                    )
+                }
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(errorMessage = "Lyrics AI error: ${e.message}")
+            } finally {
+                _state.value = _state.value.copy(lyricsLoadingSectionId = null)
+            }
+        }
     }
 
     fun submit() {
