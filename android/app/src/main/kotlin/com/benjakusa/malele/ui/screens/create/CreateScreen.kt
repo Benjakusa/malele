@@ -41,6 +41,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.benjakusa.malele.ui.components.AudioPlayer
 
 data class Genre(val id: String, val label: String)
 
@@ -283,6 +284,8 @@ fun CreateScreen(
                 jobState = state.jobState,
                 isPolling = state.isPolling,
                 audioReady = state.audioReady,
+                audioUrl = state.audioUrl,
+                authToken = state.authToken,
             )
         }
 
@@ -496,6 +499,8 @@ private fun JobStatusCard(
     jobState: String,
     isPolling: Boolean,
     audioReady: Boolean,
+    audioUrl: String,
+    authToken: String,
 ) {
     val stateColor = when (jobState) {
         "completed" -> MaterialTheme.colorScheme.secondary
@@ -546,12 +551,16 @@ private fun JobStatusCard(
                 )
             }
 
-            if (audioReady) {
+            if (audioReady && audioUrl.isNotBlank()) {
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    text = "🎵 Audio ready — playback coming in the next step",
-                    style = MaterialTheme.typography.bodyLarge,
+                    text = "🎵 Your song is ready",
+                    style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.secondary,
+                )
+                AudioPlayer(
+                    audioUrl = audioUrl,
+                    authToken = authToken,
                 )
             }
         }

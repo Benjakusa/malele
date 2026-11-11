@@ -92,6 +92,7 @@ dependencies {
 
     // Media3
     implementation(libs.media3ExoPlayer)
+    implementation("androidx.media3:media3-datasource:1.5.0")
     implementation(libs.media3Ui)
     implementation(libs.media3Session)
 

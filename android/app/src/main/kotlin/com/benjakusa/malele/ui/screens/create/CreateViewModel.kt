@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.benjakusa.malele.data.network.dto.JobDto
 import com.benjakusa.malele.data.network.dto.LyricsGenerateRequest
 import com.benjakusa.malele.data.network.dto.SectionDto
+import com.benjakusa.malele.data.local.TokenStore
 import com.benjakusa.malele.data.repository.GenerationRepository
 import com.benjakusa.malele.data.repository.GenerationResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -41,11 +42,14 @@ data class CreateUiState(
     val jobProvider: String = "",
     val audioReady: Boolean = false,
     val isPolling: Boolean = false,
+    val audioUrl: String = "",
+    val authToken: String = "",
 )
 
 @HiltViewModel
 class CreateViewModel @Inject constructor(
     private val generationRepository: GenerationRepository,
+    private val tokenStore: TokenStore,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CreateUiState())
@@ -147,9 +151,12 @@ class CreateViewModel @Inject constructor(
                         jobProvider = job.provider,
                     )
                     if (job.state == "completed") {
+                        val backendUrl = com.benjakusa.malele.BuildConfig.BACKEND_URL.trimEnd('/')
                         _state.value = _state.value.copy(
                             isPolling = false,
                             audioReady = true,
+                            audioUrl = "$backendUrl/v1/generations/${job.id}/audio",
+                            authToken = tokenStore.getAccessToken() ?: "",
                         )
                         return@launch
                     }
