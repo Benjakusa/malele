@@ -13,6 +13,7 @@ from app.auth.password import hash_password, verify_password
 from app.config.settings import get_settings
 from app.models.auth import Session, User
 from app.repositories import sessions as sessions_repo
+from app.credits import ledger
 from app.repositories import users as users_repo
 
 
@@ -49,6 +50,15 @@ async def register(
         password_hash=hash_password(password),
         display_name=display_name,
     )
+
+    # Grant signup bonus (idempotent — safe even if a policy changes)
+    await ledger.grant(
+        db,
+        user_id=user.id,
+        amount=_settings.CREDITS_SIGNUP_BONUS,
+        reason="signup_bonus",
+    )
+
     return await _issue_tokens(db, user)
 
 
