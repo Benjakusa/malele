@@ -4,6 +4,17 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+data class SectionDto(
+    val name: String,
+    @SerialName("duration_seconds") val durationSeconds: Int,
+    val lyrics: String? = null,
+    val instruments: String = "",
+    val vocals: String = "",
+    val mood: String = "",
+    val negative: String? = null,
+)
+
+@Serializable
 data class GenerationSubmitRequest(
     val prompt: String,
     val genre: String? = null,
@@ -12,6 +23,7 @@ data class GenerationSubmitRequest(
     val lyrics: String? = null,
     @SerialName("duration_seconds") val durationSeconds: Int = 120,
     val language: String? = null,
+    val sections: List<SectionDto>? = null,
 )
 
 @Serializable

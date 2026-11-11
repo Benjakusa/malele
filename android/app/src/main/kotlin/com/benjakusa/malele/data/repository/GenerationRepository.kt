@@ -3,6 +3,7 @@ package com.benjakusa.malele.data.repository
 import com.benjakusa.malele.data.network.ApiClient
 import com.benjakusa.malele.data.network.dto.ErrorBody
 import com.benjakusa.malele.data.network.dto.GenerationSubmitRequest
+import com.benjakusa.malele.data.network.dto.SectionDto
 import com.benjakusa.malele.data.network.dto.JobDto
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -26,6 +27,7 @@ class GenerationRepository @Inject constructor(
         instrumental: Boolean,
         durationSeconds: Int,
         language: String?,
+        sections: List<SectionDto>? = null,
     ): GenerationResult {
         return try {
             val response = apiClient.generationApi.submit(
@@ -36,6 +38,7 @@ class GenerationRepository @Inject constructor(
                     instrumental = instrumental,
                     durationSeconds = durationSeconds,
                     language = language,
+                    sections = sections,
                 )
             )
             if (response.isSuccessful) {
