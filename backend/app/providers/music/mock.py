@@ -38,17 +38,26 @@ class MockMusicProvider(MusicProvider):
         )
 
     async def submit(self, request: GenerationRequest) -> ProviderJobRef:
-        job_id = f"mock-{uuid4()}"
+        # Encode submit timestamp in job_id so poll() works after backend restart
+        job_id = f"mock-{uuid4()}-{int(time.time())}"
         self._jobs[job_id] = time.monotonic()
         return ProviderJobRef(provider=self.kind, provider_job_id=job_id)
 
     async def poll(self, job: ProviderJobRef) -> ProviderJobStatus:
+        # Prefer in-memory lookup (fast path, respects PROCESSING_SECONDS exactly)
         started = self._jobs.get(job.provider_job_id)
-        if started is None:
-            return ProviderJobStatus(state=ProviderJobState.FAILED, error="unknown job")
-        elapsed = time.monotonic() - started
+        if started is not None:
+            elapsed = time.monotonic() - started
+        else:
+            # Fallback: parse timestamp from job_id (survives backend restart)
+            try:
+                ts_str = job.provider_job_id.rsplit("-", 1)[-1]
+                started_at = int(ts_str)
+                elapsed = time.time() - started_at
+            except (ValueError, IndexError):
+                return ProviderJobStatus(state=ProviderJobState.FAILED, error="unknown job")
         if elapsed < self.PROCESSING_SECONDS:
-            progress = int((elapsed / self.PROCESSING_SECONDS) * 100)
+            progress = max(1, int((elapsed / self.PROCESSING_SECONDS) * 100))
             return ProviderJobStatus(state=ProviderJobState.PROCESSING, progress=progress)
         return ProviderJobStatus(state=ProviderJobState.COMPLETED, progress=100)
 

@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from pathlib import Path
 from uuid import UUID, uuid4
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,7 +17,13 @@ from app.providers.base import (
 from app.providers.registry import get_registry
 
 
+import structlog
+logger = structlog.get_logger()
 _settings = get_settings()
+
+# Storage for generated audio (local disk for now; S3 in Phase 9)
+_GENERATIONS_DIR = Path("storage/generations")
+_GENERATIONS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 class GenerationError(Exception):
@@ -163,10 +170,16 @@ async def poll_and_complete(db: AsyncSession, *, job_id: UUID) -> GenerationJob:
             await ledger.refund_reserved(db, job_id=job_id)
             return job
         job.state = JobState.COMPLETED
+        # Persist audio to disk for playback
+        ext = "wav" if "wav" in result_data.content_type else "mp3"
+        audio_path = _GENERATIONS_DIR / f"{job_id}.{ext}"
+        audio_path.write_bytes(result_data.audio_bytes)
+        logger.info("audio_saved", job_id=str(job_id), path=str(audio_path), bytes=len(result_data.audio_bytes))
         job.result_payload = {
             "audio_size": len(result_data.audio_bytes),
             "content_type": result_data.content_type,
             "duration_seconds": result_data.duration_seconds,
+            "audio_path": str(audio_path),
             "metadata": result_data.metadata,
         }
         job.credits_charged = job.credits_reserved

@@ -1,7 +1,10 @@
 from typing import Annotated
 from uuid import UUID
 
+from pathlib import Path
+
 from fastapi import APIRouter, Depends, Query
+from fastapi.responses import FileResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -139,3 +142,26 @@ async def get_song(
     if song is None or song.user_id != user.id:
         raise ApiError("RESOURCE_NOT_FOUND", "Song not found", 404)
     return SongOut.model_validate(song)
+
+@router.get("/generations/{job_id}/audio")
+async def get_generation_audio(
+    job_id: UUID,
+    user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> FileResponse:
+    """Serve the generated audio file for playback."""
+    job = await _job_for_user(db, job_id, user.id)
+    if job.state != "completed":
+        raise ApiError("JOB_NOT_COMPLETED", f"Job state is {job.state}", 409)
+    audio_path_str = (job.result_payload or {}).get("audio_path")
+    if not audio_path_str:
+        raise ApiError("AUDIO_NOT_FOUND", "No audio associated with this job", 404)
+    audio_path = Path(audio_path_str)
+    if not audio_path.exists():
+        raise ApiError("AUDIO_FILE_MISSING", "Audio file was deleted or moved", 404)
+    media_type = "audio/wav" if audio_path.suffix == ".wav" else "audio/mpeg"
+    return FileResponse(
+        path=str(audio_path),
+        media_type=media_type,
+        filename=f"malele_{str(job_id)[:8]}{audio_path.suffix}",
+    )
