@@ -4,6 +4,7 @@ from uuid import UUID
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, Query
+from pydantic import BaseModel
 from fastapi.responses import FileResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -165,3 +166,47 @@ async def get_generation_audio(
         media_type=media_type,
         filename=f"malele_{str(job_id)[:8]}{audio_path.suffix}",
     )
+
+class SaveSongRequest(BaseModel):
+    title: str | None = None
+
+
+@router.post("/generations/{job_id}/save", response_model=SongOut, status_code=201)
+async def save_generation_as_song(
+    job_id: UUID,
+    body: SaveSongRequest,
+    user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> SongOut:
+    """Save a completed generation as a library song."""
+    job = await _job_for_user(db, job_id, user.id)
+    if job.state != "completed":
+        raise ApiError("JOB_NOT_COMPLETED", f"Cannot save: job is {job.state}", 409)
+
+    # Check if already saved
+    from app.models.songs import Song
+    existing = (await db.execute(
+        select(Song).where(Song.job_id == job_id)
+    )).scalar_one_or_none()
+    if existing is not None:
+        return SongOut.model_validate(existing)
+
+    # Extract audio info from result_payload
+    payload = job.result_payload or {}
+    title = body.title or job.prompt_original[:100]
+    genre = job.request_payload.get("genre") if job.request_payload else None
+    language = job.request_payload.get("language") if job.request_payload else None
+
+    song = Song(
+        user_id=user.id,
+        job_id=job_id,
+        title=title,
+        genre=genre,
+        language=language,
+        is_favourite=False,
+        is_public=False,
+    )
+    db.add(song)
+    await db.flush()
+
+    return SongOut.model_validate(song)

@@ -286,6 +286,9 @@ fun CreateScreen(
                 audioReady = state.audioReady,
                 audioUrl = state.audioUrl,
                 authToken = state.authToken,
+                isSaving = state.isSaving,
+                savedSongId = state.savedSongId,
+                onSave = { viewModel.saveJob() },
             )
         }
 
@@ -501,6 +504,9 @@ private fun JobStatusCard(
     audioReady: Boolean,
     audioUrl: String,
     authToken: String,
+    isSaving: Boolean,
+    savedSongId: String?,
+    onSave: () -> Unit,
 ) {
     val stateColor = when (jobState) {
         "completed" -> MaterialTheme.colorScheme.secondary
@@ -562,6 +568,26 @@ private fun JobStatusCard(
                     audioUrl = audioUrl,
                     authToken = authToken,
                 )
+                Spacer(Modifier.height(12.dp))
+                if (savedSongId != null) {
+                    Text(
+                        text = "✓ Saved to library",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.secondary,
+                    )
+                } else {
+                    Button(
+                        onClick = onSave,
+                        enabled = !isSaving,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        if (isSaving) {
+                            CircularProgressIndicator(modifier = Modifier.height(20.dp), strokeWidth = 2.dp)
+                        } else {
+                            Text("Save to library")
+                        }
+                    }
+                }
             }
         }
     }

@@ -44,6 +44,8 @@ data class CreateUiState(
     val isPolling: Boolean = false,
     val audioUrl: String = "",
     val authToken: String = "",
+    val isSaving: Boolean = false,
+    val savedSongId: String? = null,
 )
 
 @HiltViewModel
@@ -193,6 +195,26 @@ class CreateViewModel @Inject constructor(
             isPolling = false,
             errorMessage = null,
         )
+    }
+
+    fun saveJob(title: String? = null) {
+        val job = _state.value.submittedJob ?: return
+        if (_state.value.savedSongId != null || _state.value.isSaving) return
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isSaving = true, errorMessage = null)
+            val song = generationRepository.saveJob(job.id, title)
+            if (song != null) {
+                _state.value = _state.value.copy(
+                    isSaving = false,
+                    savedSongId = song.id,
+                )
+            } else {
+                _state.value = _state.value.copy(
+                    isSaving = false,
+                    errorMessage = "Failed to save song",
+                )
+            }
+        }
     }
 
     fun submit() {

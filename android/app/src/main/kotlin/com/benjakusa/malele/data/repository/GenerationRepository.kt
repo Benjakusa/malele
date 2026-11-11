@@ -3,7 +3,9 @@ package com.benjakusa.malele.data.repository
 import com.benjakusa.malele.data.network.ApiClient
 import com.benjakusa.malele.data.network.dto.ErrorBody
 import com.benjakusa.malele.data.network.dto.GenerationSubmitRequest
+import com.benjakusa.malele.data.network.dto.SaveSongRequest
 import com.benjakusa.malele.data.network.dto.SectionDto
+import com.benjakusa.malele.data.network.dto.SongDto
 import com.benjakusa.malele.data.network.dto.JobDto
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -67,6 +69,20 @@ class GenerationRepository @Inject constructor(
             val response = apiClient.generationApi.pollJob(jobId)
             if (response.isSuccessful) response.body() else null
         } catch (e: Exception) { null }
+    }
+
+    suspend fun saveJob(jobId: String, title: String? = null): SongDto? {
+        return try {
+            val response = apiClient.generationApi.saveJob(jobId, SaveSongRequest(title))
+            if (response.isSuccessful) response.body() else null
+        } catch (e: Exception) { null }
+    }
+
+    suspend fun listSongs(): List<SongDto> {
+        return try {
+            val response = apiClient.generationApi.listSongs()
+            if (response.isSuccessful) response.body() ?: emptyList() else emptyList()
+        } catch (e: Exception) { emptyList() }
     }
 
     private fun parseError(code: Int, body: String?): Pair<String, String> {

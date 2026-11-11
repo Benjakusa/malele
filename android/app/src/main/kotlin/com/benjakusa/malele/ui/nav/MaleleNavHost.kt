@@ -27,6 +27,7 @@ import com.benjakusa.malele.ui.screens.create.CreateScreen
 import com.benjakusa.malele.ui.screens.explore.ExploreScreen
 import com.benjakusa.malele.ui.screens.library.LibraryScreen
 import com.benjakusa.malele.ui.screens.profile.ProfileScreen
+import com.benjakusa.malele.ui.screens.songdetail.SongDetailScreen
 import javax.inject.Inject
 
 sealed class AuthScreen(val route: String) {
@@ -109,7 +110,35 @@ private fun MainNavGraph(onLogout: () -> Unit) {
         ) {
             composable(Screen.Create.route) { CreateScreen() }
             composable(Screen.Explore.route) { ExploreScreen() }
-            composable(Screen.Library.route) { LibraryScreen() }
+            composable(Screen.Library.route) {
+                LibraryScreen(
+                    onSongClick = { song ->
+                        val jobId = song.jobId ?: return@LibraryScreen
+                        navController.navigate("song/$jobId?title=${java.net.URLEncoder.encode(song.title, "UTF-8")}&genre=${song.genre ?: ""}&language=${song.language ?: ""}")
+                    }
+                )
+            }
+            composable(
+                route = "song/{jobId}?title={title}&genre={genre}&language={language}",
+                arguments = listOf(
+                    androidx.navigation.navArgument("jobId") { type = androidx.navigation.NavType.StringType },
+                    androidx.navigation.navArgument("title") { type = androidx.navigation.NavType.StringType; defaultValue = "" },
+                    androidx.navigation.navArgument("genre") { type = androidx.navigation.NavType.StringType; defaultValue = "" },
+                    androidx.navigation.navArgument("language") { type = androidx.navigation.NavType.StringType; defaultValue = "" },
+                ),
+            ) { backStackEntry ->
+                val jobId = backStackEntry.arguments?.getString("jobId").orEmpty()
+                val title = backStackEntry.arguments?.getString("title").orEmpty()
+                val genre = backStackEntry.arguments?.getString("genre").orEmpty()
+                val language = backStackEntry.arguments?.getString("language").orEmpty()
+                SongDetailScreen(
+                    jobId = jobId,
+                    title = title,
+                    genre = genre.ifBlank { null },
+                    language = language.ifBlank { null },
+                    onBack = { navController.popBackStack() },
+                )
+            }
             composable(Screen.Profile.route) { ProfileScreen() }
         }
     }

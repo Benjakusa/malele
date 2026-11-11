@@ -56,6 +56,7 @@ class GenerationSubmitResponse(BaseModel):
 
 class SongOut(BaseModel):
     id: UUID
+    job_id: UUID | None
     title: str
     genre: str | None
     mood: str | None
