@@ -37,6 +37,10 @@ data class CreateUiState(
     val submittedJob: JobDto? = null,
     val errorMessage: String? = null,
     val lyricsLoadingSectionId: String? = null,
+    val jobState: String = "",
+    val jobProvider: String = "",
+    val audioReady: Boolean = false,
+    val isPolling: Boolean = false,
 )
 
 @HiltViewModel
@@ -126,6 +130,64 @@ class CreateViewModel @Inject constructor(
         }
     }
 
+    private var pollJobCoroutine: kotlinx.coroutines.Job? = null
+
+    fun pollJob(jobId: String) {
+        pollJobCoroutine?.cancel()
+        pollJobCoroutine = viewModelScope.launch {
+            _state.value = _state.value.copy(isPolling = true)
+            var attempts = 0
+            while (attempts < 30) {  // max 60 seconds
+                kotlinx.coroutines.delay(2000)
+                attempts++
+                val job = generationRepository.pollJob(jobId)
+                if (job != null) {
+                    _state.value = _state.value.copy(
+                        jobState = job.state,
+                        jobProvider = job.provider,
+                    )
+                    if (job.state == "completed") {
+                        _state.value = _state.value.copy(
+                            isPolling = false,
+                            audioReady = true,
+                        )
+                        return@launch
+                    }
+                    if (job.state == "failed" || job.state == "cancelled") {
+                        _state.value = _state.value.copy(
+                            isPolling = false,
+                            errorMessage = "Job ${job.state}: ${job.errorMessage ?: "unknown"}",
+                        )
+                        return@launch
+                    }
+                }
+            }
+            _state.value = _state.value.copy(
+                isPolling = false,
+                errorMessage = "Polling timed out after 60 seconds",
+            )
+        }
+    }
+
+    fun stopPolling() {
+        pollJobCoroutine?.cancel()
+        pollJobCoroutine = null
+        _state.value = _state.value.copy(isPolling = false)
+    }
+
+    fun resetSubmit() {
+        pollJobCoroutine?.cancel()
+        pollJobCoroutine = null
+        _state.value = _state.value.copy(
+            submittedJob = null,
+            jobState = "",
+            jobProvider = "",
+            audioReady = false,
+            isPolling = false,
+            errorMessage = null,
+        )
+    }
+
     fun submit() {
         val s = _state.value
         if (s.prompt.isBlank()) {
@@ -155,10 +217,16 @@ class CreateViewModel @Inject constructor(
                 sections = sectionDtos,
             )
             when (result) {
-                is GenerationResult.Success -> _state.value = _state.value.copy(
-                    isLoading = false,
-                    submittedJob = result.job,
-                )
+                is GenerationResult.Success -> {
+                    _state.value = _state.value.copy(
+                        isLoading = false,
+                        submittedJob = result.job,
+                        jobState = result.job.state,
+                        jobProvider = result.job.provider,
+                        audioReady = false,
+                    )
+                    pollJob(result.job.id)
+                }
                 is GenerationResult.Error -> _state.value = _state.value.copy(
                     isLoading = false,
                     errorMessage = result.message,

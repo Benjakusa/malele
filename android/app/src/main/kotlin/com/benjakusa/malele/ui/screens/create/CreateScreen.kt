@@ -277,15 +277,12 @@ fun CreateScreen(
 
         if (state.submittedJob != null) {
             Spacer(Modifier.height(16.dp))
-            Text(
-                text = "Job submitted: ${state.submittedJob!!.id.take(8)}...",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.secondary,
-            )
-            Text(
-                text = "State: ${state.submittedJob!!.state}",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+            JobStatusCard(
+                jobId = state.submittedJob!!.id,
+                provider = state.jobProvider,
+                jobState = state.jobState,
+                isPolling = state.isPolling,
+                audioReady = state.audioReady,
             )
         }
 
@@ -490,4 +487,73 @@ private fun LyricsField(
         modifier = Modifier.fillMaxWidth().height(100.dp),
         maxLines = 6,
     )
+}
+
+@Composable
+private fun JobStatusCard(
+    jobId: String,
+    provider: String,
+    jobState: String,
+    isPolling: Boolean,
+    audioReady: Boolean,
+) {
+    val stateColor = when (jobState) {
+        "completed" -> MaterialTheme.colorScheme.secondary
+        "failed", "cancelled" -> MaterialTheme.colorScheme.error
+        "processing", "downloading" -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+    }
+
+    GlassCard {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column {
+                    Text(
+                        text = "Generating song",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = "Job ${jobId.take(8)}... · ${provider.ifBlank { "mock" }}",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                    )
+                }
+                if (isPolling) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.height(24.dp).width(24.dp),
+                        strokeWidth = 2.dp,
+                    )
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "State: ",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                )
+                Text(
+                    text = jobState,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = stateColor,
+                )
+            }
+
+            if (audioReady) {
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    text = "🎵 Audio ready — playback coming in the next step",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.secondary,
+                )
+            }
+        }
+    }
 }
