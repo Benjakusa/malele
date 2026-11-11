@@ -1,12 +1,14 @@
-<div align="center">
+ <div align="center">
 
 <img src="https://github.com/Benjakusa/malele/blob/main/assets/harp.png?raw=true" alt="Malele" width="120" height="120"/>
 
-# Malele
+# MALELE
 
 ### *Songs with an African heartbeat.*
 
-**AI music creation with a real African soul — compose, generate, produce, and share original African music from a single prompt or a full studio.**
+**AI music creation with a real African soul.**
+
+Compose, generate, produce, and share original African music from a single prompt or a full studio.
 
 <br/>
 
@@ -19,75 +21,92 @@
 
 <br/>
 
-[![AI - ElevenLabs](https://img.shields.io/badge/AI-ElevenLabs_Music-000000?style=for-the-badge&logo=elevenlabs&logoColor=white)](https://elevenlabs.io)
-[![AI - Anthropic](https://img.shields.io/badge/AI-Anthropic_Claude-D4A27F?style=for-the-badge&logo=anthropic&logoColor=white)](https://anthropic.com)
-[![AI - fal.ai](https://img.shields.io/badge/AI-fal.ai-8B5CF6?style=for-the-badge)](https://fal.ai)
-[![AI - OpenAI](https://img.shields.io/badge/AI-OpenAI_Images-412991?style=for-the-badge&logo=openai&logoColor=white)](https://openai.com)
+**POWERED BY AI**
+
+[![ElevenLabs](https://img.shields.io/badge/AI-ElevenLabs_Music-000000?style=for-the-badge&logo=elevenlabs&logoColor=white)](https://elevenlabs.io)
+[![Anthropic](https://img.shields.io/badge/AI-Anthropic_Claude-D4A27F?style=for-the-badge&logo=anthropic&logoColor=white)](https://anthropic.com)
+[![fal.ai](https://img.shields.io/badge/AI-fal.ai-8B5CF6?style=for-the-badge)](https://fal.ai)
+[![OpenAI](https://img.shields.io/badge/AI-OpenAI_Images-412991?style=for-the-badge&logo=openai&logoColor=white)](https://openai.com)
 
 <br/>
 
 [![Status](https://img.shields.io/badge/Status-Active_Development-orange?style=for-the-badge)](https://github.com/Benjakusa/malele)
 [![License](https://img.shields.io/badge/License-Proprietary-red?style=for-the-badge)](./docs/LICENSES.md)
-[![Made in](https://img.shields.io/badge/Made_in-Kenya-000000?style=for-the-badge)](https://github.com/Benjakusa)
+[![Made in Kenya](https://img.shields.io/badge/Made_in-Kenya-000000?style=for-the-badge)](https://github.com/Benjakusa)
+
+<br/>
+
+*An African sound. A new creative possibility.*
 
 </div>
 
 ---
 
-> **PROPRIETARY SOFTWARE — ALL RIGHTS RESERVED**
+> **PROPRIETARY SOFTWARE | ALL RIGHTS RESERVED**
 >
-> **Owner:** **Benard Oloo Ochieng** · **Contact:** **+254 722 839 617** · **© 2026**
+> **Owner:** Benard Oloo Ochieng  
+> **Contact:** +254 722 839 617  
+> **Copyright:** © 2026
 >
 > This software and its source code are the exclusive intellectual property of **Benard Oloo Ochieng**. No part of this repository may be copied, modified, distributed, sublicensed, reverse-engineered, or used in any form without prior written consent. Unauthorized use will be pursued to the fullest extent of applicable law.
 
 ---
 
-## Table of Contents
+## Contents
 
-- [The Vision](#the-vision)
-- [Core Capabilities](#core-capabilities)
-- [African Music Intelligence](#african-music-intelligence)
-- [Supported Languages](#supported-languages)
-- [Architecture](#architecture)
-- [Technology Stack](#technology-stack)
-- [Project Structure](#project-structure)
-- [Development Status](#development-status)
-- [Documentation](#documentation)
-- [Security and Privacy](#security-and-privacy)
-- [License and Ownership](#license-and-ownership)
-- [Contact](#contact)
+| # | Section |
+|:---:|---|
+| 01 | [The Vision](#01-the-vision) |
+| 02 | [Core Capabilities](#02-core-capabilities) |
+| 03 | [African Music Intelligence](#03-african-music-intelligence) |
+| 04 | [Supported Languages](#04-supported-languages) |
+| 05 | [Architecture](#05-architecture) |
+| 06 | [Technology Stack](#06-technology-stack) |
+| 07 | [Project Structure](#07-project-structure) |
+| 08 | [Development Status](#08-development-status) |
+| 09 | [Documentation](#09-documentation) |
+| 10 | [Security and Privacy](#10-security-and-privacy) |
+| 11 | [License and Ownership](#11-license-and-ownership) |
+| 12 | [Contact](#12-contact) |
 
 ---
 
-## The Vision
+## 01 | The Vision
 
-African music is one of the richest musical traditions on Earth — **Benga**, **Rhumba**, **Soukous**, **Gospel**, **Afro-dance**, **Amapiano**, **Highlife**, **Fuji**, **Mbalax**, and hundreds more. Yet the tools to create this music professionally have been locked behind expensive DAWs, steep learning curves, and English-only interfaces.
+African music is one of the richest musical traditions on Earth.
 
-**Malele changes that.**
+From the interlocking guitars of **Benga** to the rhythms of **Rhumba**, the energy of **Soukous**, the harmonies of **Gospel**, the movement of **Afro-dance**, and the contemporary sounds of **Amapiano**, Africa has an extraordinary musical identity.
+
+Its musical traditions extend across **Highlife, Fuji, Mbalax**, and hundreds of other genres.
+
+Yet the tools to create this music professionally have been locked behind expensive DAWs, steep learning curves, and English-only interfaces.
+
+### Malele changes that.
 
 <div align="center">
 
-| | Belief |
-|:---:|:---|
+| | Our Beliefs |
+|:---:|---|
 | **01** | **Anyone can make music.** A first-time user should be able to describe a song and hear it back in two minutes. |
-| **02** | **African genres deserve dedicated tools.** Benga is not "generic pop with African drums." Each tradition has its own grammar — and Malele honours it. |
+| **02** | **African genres deserve dedicated tools.** Benga is not "generic pop with African drums." Each tradition has its own grammar, and Malele honours it. |
 | **03** | **AI is a co-producer, not a replacement.** Malele assists you. It never overrides you. Every parameter, note, and word stays in your hands. |
 
 </div>
 
 ---
 
-## Core Capabilities
+## 02 | Core Capabilities
 
-Malele is organised around **two complementary creative modes** that share one engine:
+Malele is organised around **two complementary creative modes** that share one engine, supported by a personal music library and a future community experience.
 
 <table>
 <tr>
 <td width="50%" valign="top">
 
-### Create — AI Song Generation
+### 🎼 Create
+**AI Song Generation**
 
-Describe what you want. Pick a genre, a mood, a language.
+Describe what you want. Pick a genre, a mood, and a language.
 
 Malele writes the lyrics, composes the music, and delivers **two variations** to compare.
 
@@ -96,7 +115,8 @@ Every generated song remains **fully editable**.
 </td>
 <td width="50%" valign="top">
 
-### Studio — Beat Making and Vocals
+### 🎛️ Studio
+**Beat Making and Vocals**
 
 Compose from scratch with a **step sequencer**, **per-instrument parameters**, and a **mixer**.
 
@@ -111,16 +131,18 @@ Export to **WAV** or **M4A**.
 <tr>
 <td width="50%" valign="top">
 
-### Library — Your Archive
+### 🎵 Library
+**Your Archive**
 
 Every generated or produced song lives in your library.
 
-**Replay, edit, share, export** — offline, on your own device.
+**Replay, edit, share, export**, offline, on your own device.
 
 </td>
 <td width="50%" valign="top">
 
-### Explore — Coming Soon
+### 🌍 Explore
+**Coming Soon**
 
 Discover music made by other Malele creators.
 
@@ -134,14 +156,12 @@ Learn from the community.
 
 ---
 
-## African Music Intelligence
+## 03 | African Music Intelligence
 
-Malele is built around a **dedicated African genre library**, with structured configuration for each tradition.
-
-<div align="center">
+Malele is built around a **dedicated African genre library**, with structured configuration for each musical tradition.
 
 | Genre | Region | Signature Elements |
-|:---|:---|:---|
+|---|---|---|
 | **Benga** | Kenya | Interlocking guitars, driving bass, syncopated percussion |
 | **Rhumba** | DR Congo | Clave-based rhythm, flowing guitar arpeggios, sebene sections |
 | **Soukous** | Congo Basin | Fast interlocking guitars, energetic drums |
@@ -154,15 +174,15 @@ Malele is built around a **dedicated African genre library**, with structured co
 | **Highlife** | West Africa | Guitar-driven melody, horn sections |
 | **Custom** | Yours | User-defined genre, sub-genre, or fusion |
 
-</div>
+> **Every genre is a starting point, not a boundary.**
 
-**Every genre is a starting point, not a boundary.** Users retune tempo, swing, instruments, and arrangement to their taste.
+Users retune tempo, swing, instruments, and arrangement to their taste.
 
 ---
 
-## Supported Languages
+## 04 | Supported Languages
 
-Malele is designed to create music in the languages of its users:
+Malele is designed to create music in the languages of its users.
 
 <div align="center">
 
@@ -177,55 +197,67 @@ Malele is designed to create music in the languages of its users:
 
 </div>
 
-**Honest disclaimer:** AI language quality varies. Not every language is equally well supported by current AI providers. Users should evaluate output in their own language — Malele does not claim native-level fidelity for every language.
+**Honest disclaimer:** AI language quality varies. Not every language is equally well supported by current AI providers. Users should evaluate output in their own language. Malele does not claim native-level fidelity for every language.
 
 ---
 
-## Architecture
+## 05 | Architecture
 
-Malele uses a **three-layer architecture** with strict boundaries:
+Malele uses a **three-layer architecture** with strict boundaries.
+
+### System Architecture
+
+```text
 ┌─────────────────────────────────────────────────────────────┐
-│ Android Application │
-│ Kotlin · Compose · Hilt · Room · Media3 │
-└──────────────────────────┬──────────────────────────────────┘
-│ HTTPS + JWT
-▼
+│                     ANDROID APPLICATION                     │
+│                                                             │
+│              Kotlin · Compose · Hilt · Room · Media3        │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+                         HTTPS + JWT
+                               │
+                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ Malele Backend (FastAPI) │
-│ Auth · Jobs · Credits · Provider Router · Storage │
-└──────┬──────────────┬──────────────┬──────────────┬─────────┘
-│ │ │ │
-▼ ▼ ▼ ▼
-┌──────────┐ ┌──────────────┐ ┌──────────┐ ┌──────────┐
-│ Music │ │ Lyrics │ │ Image │ │ Storage │
-│ElevenLabs│ │ Anthropic │ │ OpenAI │ │ S3/R2 │
-│ fal.ai │ │ Claude │ │ │ │ │
-└──────────┘ └──────────────┘ └──────────┘ └──────────┘
-│ │ │ │
-└──────────────┴──────────────┴──────────────┘
-│
-▼
-┌──────────────────┐
-│ PostgreSQL │
-│ Redis │
-└──────────────────┘
+│                    MALELE BACKEND (FastAPI)                  │
+│                                                             │
+│       Auth · Jobs · Credits · Provider Router · Storage     │
+└──────────────┬───────────────┬──────────────┬────────────────┘
+               │               │              │
+               ▼               ▼              ▼
+       ┌────────────┐  ┌────────────┐  ┌────────────┐
+       │   MUSIC    │  │   LYRICS   │  │   IMAGE    │
+       │            │  │            │  │            │
+       │ ElevenLabs │  │ Anthropic  │  │  OpenAI    │
+       │  fal.ai    │  │  Claude    │  │            │
+       └────────────┘  └────────────┘  └────────────┘
+               │               │              │
+               └───────────────┴──────────────┘
+                               │
+                               ▼
+                    ┌────────────────────┐
+                    │    DATA LAYER      │
+                    │                    │
+                    │    PostgreSQL      │
+                    │    Redis           │
+                    └────────────────────┘
+```
 
-text
-
-**Key architectural principles:**
+### Key Architectural Principles
 
 - **Provider keys never touch the app.** All AI calls go through the backend.
-- **Provider-independent.** Every AI is behind an interface — swap providers without changing app code.
-- **Async by design.** Music generation is a job queue — no blocking UI.
+- **Provider-independent.** Every AI is behind an interface. Providers can be swapped without changing app code.
+- **Async by design.** Music generation is a job queue, ensuring no blocking UI.
 - **Cost-aware.** Every provider call is tracked, reserved, and refunded on failure.
 
 ---
 
-## Technology Stack
+## 06 | Technology Stack
 
-<div align="center">
+Malele combines native Android development, a modern Python backend, scalable data infrastructure, and multiple AI integrations.
 
 ### Android Application
+
+<div align="center">
 
 ![Kotlin](https://img.shields.io/badge/Kotlin_2.1-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)
 ![Jetpack Compose](https://img.shields.io/badge/Jetpack_Compose-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)
@@ -238,7 +270,11 @@ text
 ![Coroutines](https://img.shields.io/badge/Coroutines-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)
 ![DataStore](https://img.shields.io/badge/DataStore-4285F4?style=for-the-badge&logo=android&logoColor=white)
 
+</div>
+
 ### Backend Service
+
+<div align="center">
 
 ![Python](https://img.shields.io/badge/Python_3.13-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
@@ -247,21 +283,33 @@ text
 ![Pydantic](https://img.shields.io/badge/Pydantic_v2-E92063?style=for-the-badge&logo=pydantic&logoColor=white)
 ![Celery](https://img.shields.io/badge/Celery-37814A?style=for-the-badge&logo=celery&logoColor=white)
 
+</div>
+
 ### Data and Infrastructure
+
+<div align="center">
 
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL_16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis_7-DC382D?style=for-the-badge&logo=redis&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![S3](https://img.shields.io/badge/S3_Compatible-569A31?style=for-the-badge&logo=amazons3&logoColor=white)
 
+</div>
+
 ### AI Integrations
+
+<div align="center">
 
 ![ElevenLabs](https://img.shields.io/badge/ElevenLabs_Music-000000?style=for-the-badge&logo=elevenlabs&logoColor=white)
 ![Anthropic](https://img.shields.io/badge/Anthropic_Claude-D4A27F?style=for-the-badge&logo=anthropic&logoColor=white)
 ![fal.ai](https://img.shields.io/badge/fal.ai-8B5CF6?style=for-the-badge)
 ![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white)
 
+</div>
+
 ### Developer Tools
+
+<div align="center">
 
 ![Gradle](https://img.shields.io/badge/Gradle_8.13-02303A?style=for-the-badge&logo=gradle&logoColor=white)
 ![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white)
@@ -273,81 +321,86 @@ text
 
 ---
 
-## Project Structure
-malele/
-├── android/ # Android application
-│ ├── app/ # Application module
-│ ├── core/ # Shared modules
-│ │ ├── audio/ # Audio engine and synthesis
-│ │ ├── common/ # Utilities
-│ │ ├── database/ # Room DAOs
-│ │ ├── design/ # Theme and design system
-│ │ ├── model/ # Domain models
-│ │ ├── network/ # Retrofit clients
-│ │ └── storage/ # File I/O and cache
-│ ├── feature/ # Feature modules
-│ │ ├── auth/ # Login and registration
-│ │ ├── create/ # AI generation UI
-│ │ ├── generation/ # Job polling and progress
-│ │ ├── library/ # Song library
-│ │ ├── player/ # Media3 playback
-│ │ ├── studio/ # Beat maker and vocals
-│ │ └── ... # Other features
-│ └── gradle/ # Version catalog
-│
-├── backend/ # FastAPI service
-│ ├── app/
-│ │ ├── api/ # HTTP routes
-│ │ ├── auth/ # JWT and Argon2id
-│ │ ├── generation/ # Job orchestration
-│ │ ├── providers/ # Music, lyrics, image adapters
-│ │ │ ├── music/ # ElevenLabs, fal, mock
-│ │ │ ├── lyrics/ # Anthropic
-│ │ │ └── images/ # OpenAI
-│ │ ├── services/ # Business logic
-│ │ ├── storage/ # S3 abstraction
-│ │ └── workers/ # Celery tasks
-│ ├── migrations/ # Alembic migrations
-│ └── tests/ # Pytest suite
-│
-├── docs/ # Architecture and specifications
-├── assets/ # Brand assets, samples
-├── scripts/ # Developer and deployment scripts
-└── docker-compose.yml # Local development stack
+## 07 | Project Structure
 
-text
+```text
+malele/
+│
+├── android/                       # Android application
+│   ├── app/                       # Application module
+│   ├── core/                      # Shared modules
+│   │   ├── audio/                 # Audio engine and synthesis
+│   │   ├── common/                # Utilities
+│   │   ├── database/              # Room DAOs
+│   │   ├── design/                # Theme and design system
+│   │   ├── model/                 # Domain models
+│   │   ├── network/               # Retrofit clients
+│   │   └── storage/               # File I/O and cache
+│   │
+│   ├── feature/                   # Feature modules
+│   │   ├── auth/                  # Login and registration
+│   │   ├── create/                # AI generation UI
+│   │   ├── generation/            # Job polling and progress
+│   │   ├── library/               # Song library
+│   │   ├── player/                # Media3 playback
+│   │   ├── studio/                # Beat maker and vocals
+│   │   └── ...                    # Other features
+│   │
+│   └── gradle/                    # Version catalog
+│
+├── backend/                       # FastAPI service
+│   ├── app/
+│   │   ├── api/                   # HTTP routes
+│   │   ├── auth/                  # JWT and Argon2id
+│   │   ├── generation/            # Job orchestration
+│   │   ├── providers/              # Music, lyrics, image adapters
+│   │   │   ├── music/             # ElevenLabs, fal, mock
+│   │   │   ├── lyrics/            # Anthropic
+│   │   │   └── images/            # OpenAI
+│   │   ├── services/              # Business logic
+│   │   ├── storage/               # S3 abstraction
+│   │   └── workers/               # Celery tasks
+│   │
+│   ├── migrations/                # Alembic migrations
+│   └── tests/                     # Pytest suite
+│
+├── docs/                          # Architecture and specifications
+├── assets/                        # Brand assets, samples
+├── scripts/                       # Developer and deployment scripts
+└── docker-compose.yml             # Local development stack
+```
 
 ---
 
-## Development Status
+## 08 | Development Status
+
+Malele is being developed through a structured 10-phase roadmap.
 
 <div align="center">
 
 | Phase | Focus | Status |
-|:---:|:---|:---:|
-| **0** | Planning, research, documentation | Complete |
-| **1** | Backend foundation (auth, jobs, credits) | Complete |
-| **2** | AI provider integrations | Complete |
-| **3** | Android foundation and design system | Complete |
-| **4** | Create experience (generation, playback, save) | Complete |
-| **5** | Song results, player, library | In Progress |
-| **6** | Song editing and version control | Planned |
-| **7** | Studio Composer and vocal recording | In Progress |
-| **8** | Explore, community, creator profiles | Planned |
-| **9** | Production deployment, credits UI, release | Planned |
+|:---:|---|:---:|
+| **0** | Planning, research, documentation | <img src="https://img.shields.io/badge/Complete-2EA44F?style=flat-square"/> |
+| **1** | Backend foundation (auth, jobs, credits) | <img src="https://img.shields.io/badge/Complete-2EA44F?style=flat-square"/> |
+| **2** | AI provider integrations | <img src="https://img.shields.io/badge/Complete-2EA44F?style=flat-square"/> |
+| **3** | Android foundation and design system | <img src="https://img.shields.io/badge/Complete-2EA44F?style=flat-square"/> |
+| **4** | Create experience (generation, playback, save) | <img src="https://img.shields.io/badge/Complete-2EA44F?style=flat-square"/> |
+| **5** | Song results, player, library | <img src="https://img.shields.io/badge/In_Progress-DBAB09?style=flat-square"/> |
+| **6** | Song editing and version control | <img src="https://img.shields.io/badge/Planned-0366D6?style=flat-square"/> |
+| **7** | Studio Composer and vocal recording | <img src="https://img.shields.io/badge/In_Progress-DBAB09?style=flat-square"/> |
+| **8** | Explore, community, creator profiles | <img src="https://img.shields.io/badge/Planned-0366D6?style=flat-square"/> |
+| **9** | Production deployment, credits UI, release | <img src="https://img.shields.io/badge/Planned-0366D6?style=flat-square"/> |
 
 </div>
 
 ---
 
-## Documentation
+## 09 | Documentation
 
-Full project documentation lives in [`docs/`](./docs):
-
-<div align="center">
+Full project documentation lives in [`docs/`](./docs).
 
 | Document | Purpose |
-|:---|:---|
+|---|---|
 | [**PLAN.md**](./docs/PLAN.md) | 10-phase roadmap with acceptance gates |
 | [**ARCHITECTURE.md**](./docs/ARCHITECTURE.md) | System, Android, backend, database |
 | [**DECISIONS.md**](./docs/DECISIONS.md) | All architecture decision records (ADRs) |
@@ -359,33 +412,27 @@ Full project documentation lives in [`docs/`](./docs):
 | [**API_INTEGRATIONS.md**](./docs/API_INTEGRATIONS.md) | Provider capabilities and terms |
 | [**COST_MODEL.md**](./docs/COST_MODEL.md) | Unit costs and provider economics |
 
-</div>
-
 ---
 
-## Security and Privacy
+## 10 | Security and Privacy
 
 Malele takes user trust seriously.
 
-<div align="center">
-
 | Control | Detail |
-|:---|:---|
+|---|---|
 | **API Keys** | Never touch the Android app. All provider calls go through the backend. |
-| **Passwords** | Hashed with Argon2id — not bcrypt, not PBKDF2. |
-| **Tokens** | Stored in Android's EncryptedSharedPreferences — never in plain files. |
+| **Passwords** | Hashed with Argon2id, not bcrypt, not PBKDF2. |
+| **Tokens** | Stored in Android's EncryptedSharedPreferences, never in plain files. |
 | **Privacy** | Private songs remain private. No generated music is published without explicit action. |
 | **Ownership** | Users own their generated music. Malele grants no rights to user content beyond service operation. |
 | **Voice** | No voice cloning of real people without consent. The AI is instructed to refuse impersonation. |
 | **Copyright** | No copyrighted lyrics are stored or generated. A validator runs before any lyrics reach a provider. |
 
-</div>
-
 Full details in [**SECURITY.md**](./docs/SECURITY.md).
 
 ---
 
-## License and Ownership
+## 11 | License and Ownership
 
 <div align="center">
 
@@ -399,20 +446,24 @@ This repository and its contents are **confidential and proprietary**. Access is
 
 **Any redistribution, modification, reverse-engineering, or commercial use without the express written permission of the owner is strictly prohibited.**
 
-Third-party dependencies are used under their respective licenses — see [**LICENSES.md**](./docs/LICENSES.md) for the full inventory.
+Third-party dependencies are used under their respective licenses. See [**LICENSES.md**](./docs/LICENSES.md) for the full inventory.
 
 The name **"Malele"**, the woven African band visual identity, and the proprietary audio composition system are **trademarks and trade secrets** of Benard Oloo Ochieng.
 
 ---
 
-## Contact
+## 12 | Contact
 
 <div align="center">
+
+<img src="https://github.com/Benjakusa/malele/blob/main/assets/harp.png?raw=true" alt="Malele Logo" width="90"/>
 
 ### Benard Oloo Ochieng
 
 **Phone:** +254 722 839 617
+
 **Location:** Kenya
+
 **GitHub:** [github.com/Benjakusa](https://github.com/Benjakusa)
 
 *For business, licensing, or partnership enquiries, please contact the owner directly.*
@@ -423,7 +474,7 @@ The name **"Malele"**, the woven African band visual identity, and the proprieta
 
 <div align="center">
 
-## Malele
+# MALELE
 
 ### *Songs with an African heartbeat.*
 
@@ -437,6 +488,6 @@ The name **"Malele"**, the woven African band visual identity, and the proprieta
 
 <br/>
 
-*© 2026 Benard Oloo Ochieng — All Rights Reserved*
+*© 2026 Benard Oloo Ochieng · All Rights Reserved*
 
 </div>
