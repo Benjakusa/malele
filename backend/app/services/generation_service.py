@@ -11,6 +11,7 @@ from app.providers.base import (
     ProviderJobRef,
     ProviderJobState,
     ProviderKind,
+    SectionRequest,
 )
 from app.providers.registry import get_registry
 
@@ -54,6 +55,7 @@ async def submit(
     lyrics: str | None = None,
     duration_seconds: int = 120,
     language: str | None = None,
+    sections: list[SectionRequest] | None = None,
 ) -> GenerationJob:
     """Reserve credits and create a queued generation job."""
     if not _settings.GENERATION_ENABLED:
@@ -77,6 +79,17 @@ async def submit(
             "lyrics": lyrics,
             "duration_seconds": duration_seconds,
             "language": language,
+            "sections": [
+                {
+                    "name": s.name,
+                    "duration_seconds": s.duration_seconds,
+                    "instruments": s.instruments,
+                    "vocals": s.vocals,
+                    "mood": s.mood,
+                    "negative": s.negative,
+                }
+                for s in (sections or [])
+            ] if sections else [],
         },
         credits_reserved=cost,
     )
@@ -97,6 +110,7 @@ async def submit(
         lyrics=lyrics,
         duration_seconds=duration_seconds,
         language=language,
+        sections=sections,
     )
 
     try:

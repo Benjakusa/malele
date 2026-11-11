@@ -11,6 +11,7 @@ from app.database.session import get_db
 from app.models.auth import User
 from app.models.jobs import GenerationJob
 from app.models.songs import Song
+from app.providers.base import SectionRequest
 from app.schemas.generation import (
     GenerationJobOut,
     GenerationSubmitRequest,
@@ -37,6 +38,20 @@ async def submit_generation(
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> GenerationSubmitResponse:
     try:
+        sections = None
+        if body.sections:
+            sections = [
+                SectionRequest(
+                    name=s.name,
+                    duration_seconds=s.duration_seconds,
+                    lyrics=s.lyrics,
+                    instruments=s.instruments,
+                    vocals=s.vocals,
+                    mood=s.mood,
+                    negative=s.negative,
+                )
+                for s in body.sections
+            ]
         job = await generation_service.submit(
             db,
             user_id=user.id,
@@ -47,6 +62,7 @@ async def submit_generation(
             lyrics=body.lyrics,
             duration_seconds=body.duration_seconds,
             language=body.language,
+            sections=sections,
         )
     except generation_service.GenerationError as e:
         status = 402 if e.code == "CREDITS_INSUFFICIENT" else 400

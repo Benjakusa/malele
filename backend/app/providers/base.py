@@ -22,6 +22,18 @@ class ProviderCapabilities:
 
 
 @dataclass
+class SectionRequest:
+    """One section of a song (provider-level)."""
+    name: str
+    duration_seconds: int
+    lyrics: str | None = None
+    instruments: str = ""
+    vocals: str = ""
+    mood: str = ""
+    negative: str | None = None
+
+
+@dataclass
 class GenerationRequest:
     prompt: str
     genre: str | None = None
@@ -31,6 +43,7 @@ class GenerationRequest:
     duration_seconds: int = 120
     language: str | None = None
     preferred_provider: "ProviderKind | None" = None
+    sections: list[SectionRequest] | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
