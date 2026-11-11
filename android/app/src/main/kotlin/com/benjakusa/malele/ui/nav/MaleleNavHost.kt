@@ -4,49 +4,99 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.benjakusa.malele.data.repository.AuthRepository
+import com.benjakusa.malele.ui.screens.auth.LoginScreen
+import com.benjakusa.malele.ui.screens.auth.RegisterScreen
 import com.benjakusa.malele.ui.screens.create.CreateScreen
 import com.benjakusa.malele.ui.screens.explore.ExploreScreen
 import com.benjakusa.malele.ui.screens.library.LibraryScreen
 import com.benjakusa.malele.ui.screens.profile.ProfileScreen
+import javax.inject.Inject
+
+sealed class AuthScreen(val route: String) {
+    data object Login : AuthScreen("auth/login")
+    data object Register : AuthScreen("auth/register")
+}
 
 @Composable
-fun MaleleNavHost() {
-    val navController = rememberNavController()
+fun MaleleNavHost(
+    authRepository: AuthRepository,
+) {
+    // Check auth state once at startup. Session-agnostic (we don't watch for changes here).
+    var isLoggedIn by remember { mutableStateOf<Boolean?>(null) }
+    LaunchedEffect(Unit) {
+        isLoggedIn = authRepository.isLoggedIn()
+    }
 
+    // Show nothing while checking (a few ms, imperceptible)
+    if (isLoggedIn == null) return
+
+    if (isLoggedIn == true) {
+        MainNavGraph(onLogout = { /* handled by Profile screen in Phase 8 */ })
+    } else {
+        AuthNavGraph(onAuthSuccess = { isLoggedIn = true })
+    }
+}
+
+@Composable
+private fun AuthNavGraph(onAuthSuccess: () -> Unit) {
+    val navController = rememberNavController()
+    NavHost(
+        navController = navController,
+        startDestination = AuthScreen.Login.route,
+    ) {
+        composable(AuthScreen.Login.route) {
+            LoginScreen(
+                onLoginSuccess = onAuthSuccess,
+                onNavigateToRegister = { navController.navigate(AuthScreen.Register.route) },
+            )
+        }
+        composable(AuthScreen.Register.route) {
+            RegisterScreen(
+                onRegisterSuccess = onAuthSuccess,
+                onNavigateToLogin = { navController.popBackStack() },
+            )
+        }
+    }
+}
+
+@Composable
+private fun MainNavGraph(onLogout: () -> Unit) {
+    val navController = rememberNavController()
     Scaffold(
         bottomBar = {
             NavigationBar {
                 val backStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = backStackEntry?.destination
-
                 Screen.tabs.forEach { tab ->
                     val selected = currentDestination?.hierarchy?.any { it.route == tab.route } == true
                     NavigationBarItem(
                         selected = selected,
                         onClick = {
                             navController.navigate(tab.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
+                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                                 launchSingleTop = true
                                 restoreState = true
                             }
                         },
                         icon = { Icon(tab.icon, contentDescription = tab.label) },
                         label = { Text(tab.label) },
-                        colors = NavigationBarItemDefaults.colors(),
                     )
                 }
             }

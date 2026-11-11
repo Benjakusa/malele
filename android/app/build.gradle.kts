@@ -19,6 +19,10 @@ android {
         versionName = "0.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
+
+        // Backend URL — override with -PbackendUrl=http://x.y.z.w:8000 if needed
+        val backendUrl = (project.findProperty("backendUrl") as String?) ?: "http://10.223.163.53:8000"
+        buildConfigField("String", "BACKEND_URL", "\"$backendUrl\"")
     }
 
     buildTypes {
