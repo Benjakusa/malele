@@ -53,4 +53,5 @@ class ApiClient @Inject constructor(
         .build()
 
     val authApi: AuthApi = retrofit.create(AuthApi::class.java)
+    val generationApi: GenerationApi = retrofit.create(GenerationApi::class.java)
 }
