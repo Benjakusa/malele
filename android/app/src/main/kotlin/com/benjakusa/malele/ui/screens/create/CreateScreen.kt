@@ -60,6 +60,8 @@ import com.benjakusa.malele.ui.components.WovenProgressBar
 import com.benjakusa.malele.ui.theme.AfricanRed
 import com.benjakusa.malele.ui.theme.PureRed
 import com.benjakusa.malele.ui.theme.WovenYellow
+import com.benjakusa.malele.ui.components.MaleleErrorDialog
+import com.benjakusa.malele.ui.components.ErrorDialogType
 
 data class Genre(val id: String, val label: String)
 
@@ -86,10 +88,15 @@ fun CreateScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
-    CreditDialogs(
-        errorCode = state.errorCode,
-        onDismiss = { viewModel.clearError() },
-    )
+    state.errorCode?.let { code ->
+        val (type, title, body) = errorDialogFor(code, state.errorMessage)
+        MaleleErrorDialog(
+            type = type,
+            title = title,
+            message = body,
+            onDismiss = { viewModel.clearError() },
+        )
+    }
     var showAudioSheet by remember { mutableStateOf(false) }
     var showVoiceSheet by remember { mutableStateOf(false) }
 
@@ -317,14 +324,6 @@ fun CreateScreen(
             }
             Spacer(Modifier.height(24.dp))
 
-            if (state.errorMessage != null) {
-                Text(
-                    text = state.errorMessage!!,
-                    color = AfricanRed,
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-                Spacer(Modifier.height(8.dp))
-            }
 
             // Primary Generate button
             MaleleButton(
@@ -665,42 +664,36 @@ private fun JobStatusCard(
     }
 }
 
-@Composable
-private fun CreditDialogs(
-    errorCode: String?,
-    onDismiss: () -> Unit,
-) {
-    when (errorCode) {
-        "CREDITS_INSUFFICIENT" -> androidx.compose.material3.AlertDialog(
-            onDismissRequest = onDismiss,
-            title = { androidx.compose.material3.Text("Out of Credits") },
-            text = {
-                androidx.compose.material3.Text(
-                    "You've used all your generation credits. " +
-                    "Wait for your monthly refresh, or contact support to request more."
-                )
-            },
-            confirmButton = {
-                androidx.compose.material3.TextButton(onClick = onDismiss) {
-                    androidx.compose.material3.Text("OK")
-                }
-            },
+
+private fun errorDialogFor(
+    code: String,
+    backendMessage: String?,
+): Triple<ErrorDialogType, String, String> {
+    return when (code) {
+        "CREDITS_INSUFFICIENT" -> Triple(
+            ErrorDialogType.CREDITS,
+            "Out of Credits",
+            "You've used all your generation credits. Wait for your monthly refresh, or contact support to request more.",
         )
-        "PROVIDER_OUT_OF_CREDITS" -> androidx.compose.material3.AlertDialog(
-            onDismissRequest = onDismiss,
-            title = { androidx.compose.material3.Text("Service Temporarily Unavailable") },
-            text = {
-                androidx.compose.material3.Text(
-                    "Our music generation service is temporarily offline " +
-                    "while we replenish credits. Your work is saved. " +
-                    "Please try again in a few hours."
-                )
-            },
-            confirmButton = {
-                androidx.compose.material3.TextButton(onClick = onDismiss) {
-                    androidx.compose.material3.Text("OK")
-                }
-            },
+        "PROVIDER_OUT_OF_CREDITS" -> Triple(
+            ErrorDialogType.SERVICE,
+            "Service Temporarily Unavailable",
+            "Our music generation service is temporarily offline while we replenish credits. Your work is saved. Please try again in a few hours.",
+        )
+        "LYRICS_GENERATE_FAILED", "PROMPT_ENHANCE_FAILED" -> Triple(
+            ErrorDialogType.LYRICS,
+            "Lyrics Generation Failed",
+            "We couldn't write the lyrics this time. Try again, or write them yourself in the section editor.",
+        )
+        "NETWORK_ERROR", "TIMEOUT" -> Triple(
+            ErrorDialogType.NETWORK,
+            "Connection Issue",
+            "We couldn't reach the server. Check your internet connection and try again.",
+        )
+        else -> Triple(
+            ErrorDialogType.UNKNOWN,
+            "Something Went Wrong",
+            backendMessage?.takeIf { it.isNotBlank() } ?: "Please try again.",
         )
     }
 }
