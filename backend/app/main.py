@@ -28,6 +28,16 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         mock_provider_enabled=settings.PROVIDER_MOCK_ENABLED,
         generation_enabled=settings.GENERATION_ENABLED,
     )
+
+    # Ensure database schema exists (idempotent — safe to run on every boot).
+    # Temporary bridge until Alembic migrations are set up properly.
+    from app.database.base import Base
+    from app.database.session import engine
+    import app.models.auth, app.models.jobs, app.models.songs, app.models.credits  # noqa: F401
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    logger.info("malele_database_schema_ready")
+
     yield
     logger.info("malele_backend_shutdown")
 

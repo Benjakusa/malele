@@ -1,5 +1,6 @@
 package com.benjakusa.malele.ui.screens.create
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -11,24 +12,32 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Waves
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.RadioButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -37,11 +46,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.benjakusa.malele.ui.components.AudioPlayer
+import com.benjakusa.malele.ui.components.MaleleButton
+import com.benjakusa.malele.ui.components.MaleleCard
+import com.benjakusa.malele.ui.components.ThemeToggleButton
+import com.benjakusa.malele.ui.components.ThinWovenStrip
+import com.benjakusa.malele.ui.components.WovenProgressBar
+import com.benjakusa.malele.ui.theme.AfricanRed
+import com.benjakusa.malele.ui.theme.PureRed
+import com.benjakusa.malele.ui.theme.WovenYellow
 
 data class Genre(val id: String, val label: String)
 
@@ -70,7 +88,6 @@ fun CreateScreen(
     var showAudioSheet by remember { mutableStateOf(false) }
     var showVoiceSheet by remember { mutableStateOf(false) }
 
-    // Placeholder sheets — coming soon
     if (showAudioSheet) {
         ComingSoonSheet(
             title = "Add reference audio",
@@ -87,261 +104,270 @@ fun CreateScreen(
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
+        modifier = Modifier.fillMaxSize(),
     ) {
-        // TOP: 2 buttons side by side
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        // Thin woven strip under status bar
+        ThinWovenStrip()
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
         ) {
-            GlassButton(
-                text = "+ Audio",
-                onClick = { showAudioSheet = true },
-                modifier = Modifier.weight(1f),
-            )
-            GlassButton(
-                text = "+ Voice",
-                onClick = { showVoiceSheet = true },
-                modifier = Modifier.weight(1f),
-            )
-        }
-        Spacer(Modifier.height(20.dp))
-
-        // Prompt (glass card)
-        GlassCard {
-            Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 Text(
-                    text = "Describe your song",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.primary,
+                    text = "Create",
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
                 )
-                Spacer(Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = state.prompt,
-                    onValueChange = viewModel::setPrompt,
-                    placeholder = { Text("A Benga love song with interlocking guitars and warm vocals") },
-                    modifier = Modifier.fillMaxWidth().height(120.dp),
-                    maxLines = 5,
-                )
+                ThemeToggleButton()
             }
-        }
-        Spacer(Modifier.height(16.dp))
-
-        // Genre (horizontal scroll)
-        GlassCard {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = "Genre",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-                Spacer(Modifier.height(8.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    AFRICAN_GENRES.forEach { genre ->
-                        FilterChip(
-                            selected = state.genre == genre.id,
-                            onClick = {
-                                viewModel.setGenre(if (state.genre == genre.id) null else genre.id)
-                            },
-                            label = { Text(genre.label) },
-                        )
-                    }
-                }
-            }
-        }
-        Spacer(Modifier.height(16.dp))
-
-        // Vocals (horizontal scroll)
-        GlassCard {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = "Vocals",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-                Spacer(Modifier.height(8.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    FilterChip(
-                        selected = state.vocals,
-                        onClick = { viewModel.setVocals(true) },
-                        label = { Text("Vocals") },
-                    )
-                    FilterChip(
-                        selected = state.instrumental,
-                        onClick = { viewModel.setVocals(false) },
-                        label = { Text("Instrumental") },
-                    )
-                }
-            }
-        }
-        Spacer(Modifier.height(16.dp))
-
-        // Language (horizontal scroll)
-        GlassCard {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = "Language",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-                Spacer(Modifier.height(8.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    LANGUAGES.forEach { (code, label) ->
-                        FilterChip(
-                            selected = state.language == code,
-                            onClick = { viewModel.setLanguage(code) },
-                            label = { Text(label) },
-                        )
-                    }
-                }
-            }
-        }
-        Spacer(Modifier.height(16.dp))
-
-        // Sections header
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = "Sections (${state.sections.size})",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            OutlinedButton(onClick = viewModel::addSection) {
-                Text("+ Add section")
-            }
-        }
-        Spacer(Modifier.height(8.dp))
-
-        if (state.sections.isEmpty()) {
-            Text(
-                text = "No sections yet. Add sections to describe instruments, vocals, and lyrics per part.",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
-            )
-        } else {
-            state.sections.forEach { section ->
-                SectionEditor(
-                    section = section,
-                    onChange = { update -> viewModel.updateSection(section.id, update) },
-                    onRemove = { viewModel.removeSection(section.id) },
-                    onWriteWithAi = { viewModel.writeLyricsForSection(section.id) },
-                    isWritingLyrics = state.lyricsLoadingSectionId == section.id,
-                )
-                Spacer(Modifier.height(12.dp))
-            }
-        }
-        Spacer(Modifier.height(24.dp))
-
-        // Error
-        if (state.errorMessage != null) {
-            Text(
-                text = state.errorMessage!!,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyLarge,
-            )
-            Spacer(Modifier.height(8.dp))
-        }
-
-        // Submit
-        Button(
-            onClick = viewModel::submit,
-            enabled = !state.isLoading && state.prompt.isNotBlank(),
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            if (state.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.height(20.dp), strokeWidth = 2.dp)
-            } else {
-                Text("Generate", style = MaterialTheme.typography.titleLarge)
-            }
-        }
-
-        if (state.submittedJob != null) {
             Spacer(Modifier.height(16.dp))
-            JobStatusCard(
-                jobId = state.submittedJob!!.id,
-                provider = state.jobProvider,
-                jobState = state.jobState,
-                isPolling = state.isPolling,
-                audioReady = state.audioReady,
-                audioUrl = state.audioUrl,
-                authToken = state.authToken,
-                isSaving = state.isSaving,
-                savedSongId = state.savedSongId,
-                onSave = { viewModel.saveJob() },
+
+            // Two white buttons side by side: Add audio & Add voice
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                ActionButton(
+                    text = "Add audio",
+                    icon = { Icon(Icons.Filled.Waves, contentDescription = null, tint = AfricanRed) },
+                    onClick = { showAudioSheet = true },
+                    modifier = Modifier.weight(1f),
+                )
+                ActionButton(
+                    text = "Add voice",
+                    icon = { Icon(Icons.Filled.Mic, contentDescription = null, tint = AfricanRed) },
+                    onClick = { showVoiceSheet = true },
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            Spacer(Modifier.height(16.dp))
+
+            // Prompt card
+            MaleleCard {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Describe your song",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = state.prompt,
+                        onValueChange = viewModel::setPrompt,
+                        placeholder = { Text("A Benga love song with interlocking guitars and warm vocals") },
+                        modifier = Modifier.fillMaxWidth().height(120.dp),
+                        maxLines = 5,
+                    )
+                }
+            }
+            Spacer(Modifier.height(16.dp))
+
+            // Genre horizontal scroll
+            MaleleCard {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Genre",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        AFRICAN_GENRES.forEach { genre ->
+                            val selected = state.genre == genre.id
+                            FilterChip(
+                                selected = selected,
+                                onClick = {
+                                    viewModel.setGenre(if (selected) null else genre.id)
+                                },
+                                label = { Text(genre.label) },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = AfricanRed,
+                                    selectedLabelColor = Color.White,
+                                ),
+                            )
+                        }
+                    }
+                }
+            }
+            Spacer(Modifier.height(16.dp))
+
+            // Vocals / Instrumental toggle
+            MaleleCard {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Vocals",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        FilterChip(
+                            selected = state.vocals,
+                            onClick = { viewModel.setVocals(true) },
+                            label = { Text("Vocals") },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = AfricanRed,
+                                selectedLabelColor = Color.White,
+                            ),
+                        )
+                        FilterChip(
+                            selected = state.instrumental,
+                            onClick = { viewModel.setVocals(false) },
+                            label = { Text("Instrumental") },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = AfricanRed,
+                                selectedLabelColor = Color.White,
+                            ),
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.height(16.dp))
+
+            // Language toggle
+            MaleleCard {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Language",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        LANGUAGES.forEach { (code, label) ->
+                            FilterChip(
+                                selected = state.language == code,
+                                onClick = { viewModel.setLanguage(code) },
+                                label = { Text(label) },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = AfricanRed,
+                                    selectedLabelColor = Color.White,
+                                ),
+                            )
+                        }
+                    }
+                }
+            }
+            Spacer(Modifier.height(20.dp))
+
+            // Sections header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "Sections (${state.sections.size})",
+                    style = MaterialTheme.typography.headlineLarge.copy(fontSize = 22.sp),
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+                Button(
+                    onClick = viewModel::addSection,
+                    colors = ButtonDefaults.buttonColors(containerColor = AfricanRed),
+                ) {
+                    Text("+ Add section", color = Color.White)
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+
+            if (state.sections.isEmpty()) {
+                Text(
+                    text = "No sections yet. Add sections to describe instruments, vocals, and lyrics per part.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                )
+            } else {
+                state.sections.forEach { section ->
+                    SectionEditor(
+                        section = section,
+                        onChange = { update -> viewModel.updateSection(section.id, update) },
+                        onRemove = { viewModel.removeSection(section.id) },
+                        onWriteWithAi = { viewModel.writeLyricsForSection(section.id) },
+                        isWritingLyrics = state.lyricsLoadingSectionId == section.id,
+                    )
+                    Spacer(Modifier.height(16.dp))
+                }
+            }
+            Spacer(Modifier.height(24.dp))
+
+            if (state.errorMessage != null) {
+                Text(
+                    text = state.errorMessage!!,
+                    color = AfricanRed,
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+                Spacer(Modifier.height(8.dp))
+            }
+
+            // Primary Generate button
+            MaleleButton(
+                text = "Generate",
+                onClick = viewModel::submit,
+                enabled = state.prompt.isNotBlank(),
+                isLoading = state.isLoading,
             )
+
+            if (state.submittedJob != null) {
+                Spacer(Modifier.height(16.dp))
+                JobStatusCard(
+                    jobId = state.submittedJob!!.id,
+                    provider = state.jobProvider,
+                    jobState = state.jobState,
+                    isPolling = state.isPolling,
+                    audioReady = state.audioReady,
+                    audioUrl = state.audioUrl,
+                    authToken = state.authToken,
+                    isSaving = state.isSaving,
+                    savedSongId = state.savedSongId,
+                    onSave = { viewModel.saveJob() },
+                )
+            }
+
+            Spacer(Modifier.height(80.dp))
         }
-
-        Spacer(Modifier.height(80.dp))
     }
 }
 
 @Composable
-private fun GlassCard(
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
-) {
-    Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .shadow(
-                elevation = 8.dp,
-                shape = RoundedCornerShape(20.dp),
-                ambientColor = Color.Black.copy(alpha = 0.4f),
-                spotColor = Color.Black.copy(alpha = 0.6f),
-            ),
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.55f),
-        tonalElevation = 0.dp,
-    ) {
-        content()
-    }
-}
-
-@Composable
-private fun GlassButton(
+private fun ActionButton(
     text: String,
+    icon: @Composable () -> Unit,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Surface(
-        onClick = onClick,
-        modifier = modifier
-            .height(56.dp)
-            .shadow(
-                elevation = 8.dp,
-                shape = RoundedCornerShape(16.dp),
-                ambientColor = Color.Black.copy(alpha = 0.4f),
-                spotColor = Color.Black.copy(alpha = 0.6f),
-            ),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.55f),
-    ) {
-        Box(contentAlignment = Alignment.Center) {
+    MaleleCard(onClick = onClick, modifier = modifier.height(56.dp)) {
+        Row(
+            modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            icon()
             Text(
                 text = text,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.titleLarge.copy(fontSize = 16.sp),
+                color = MaterialTheme.colorScheme.onBackground,
             )
         }
     }
@@ -371,7 +397,7 @@ private fun SectionEditor(
     onWriteWithAi: () -> Unit,
     isWritingLyrics: Boolean,
 ) {
-    GlassCard {
+    MaleleCard {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -387,23 +413,39 @@ private fun SectionEditor(
                 )
                 Spacer(Modifier.width(8.dp))
                 TextButton(onClick = onRemove) {
-                    Text("Remove", color = MaterialTheme.colorScheme.error)
+                    Text("Remove", color = AfricanRed)
                 }
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(12.dp))
 
-            Text(
-                text = "Duration: ${section.durationSeconds}s",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.primary,
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "Duration",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+                Text(
+                    text = "${section.durationSeconds}s",
+                    style = MaterialTheme.typography.headlineLarge.copy(fontSize = 20.sp),
+                    color = AfricanRed,
+                )
+            }
             Slider(
                 value = section.durationSeconds.toFloat(),
                 onValueChange = { secs -> onChange { it.copy(durationSeconds = secs.toInt()) } },
                 valueRange = 5f..60f,
                 steps = 10,
+                colors = SliderDefaults.colors(
+                    thumbColor = Color.White,
+                    activeTrackColor = AfricanRed,
+                ),
                 modifier = Modifier.fillMaxWidth(),
             )
+            Spacer(Modifier.height(8.dp))
 
             OutlinedTextField(
                 value = section.instruments,
@@ -443,7 +485,7 @@ private fun SectionEditor(
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(16.dp))
 
             LyricsField(
                 lyrics = section.lyrics,
@@ -470,27 +512,29 @@ private fun LyricsField(
         Text(
             text = "Lyrics",
             style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.primary,
+            color = MaterialTheme.colorScheme.onBackground,
         )
         if (onWriteWithAi != null) {
-            OutlinedButton(
+            Button(
                 onClick = onWriteWithAi,
                 enabled = !isGenerating,
+                colors = ButtonDefaults.buttonColors(containerColor = AfricanRed),
             ) {
                 if (isGenerating) {
-                    CircularProgressIndicator(modifier = Modifier.height(16.dp), strokeWidth = 2.dp)
+                    CircularProgressIndicator(modifier = Modifier.height(16.dp), strokeWidth = 2.dp, color = Color.White)
                 } else {
-                    Text("✨ Write with AI")
+                    Text("✨ Write with AI", color = Color.White)
                 }
             }
         }
     }
-    Spacer(Modifier.height(4.dp))
+    Spacer(Modifier.height(8.dp))
     OutlinedTextField(
         value = lyrics,
         onValueChange = onLyricsChange,
-        placeholder = { Text("Write lyrics for this section...") },
-        modifier = Modifier.fillMaxWidth().height(100.dp),
+        placeholder = { Text("Taa za jioni zinawaka, moyo wangu unarudi kwako...") },
+        textStyle = MaterialTheme.typography.bodyMedium, // Italic serif for songbook page feel
+        modifier = Modifier.fillMaxWidth().height(120.dp),
         maxLines = 6,
     )
 }
@@ -508,14 +552,7 @@ private fun JobStatusCard(
     savedSongId: String?,
     onSave: () -> Unit,
 ) {
-    val stateColor = when (jobState) {
-        "completed" -> MaterialTheme.colorScheme.secondary
-        "failed", "cancelled" -> MaterialTheme.colorScheme.error
-        "processing", "downloading" -> MaterialTheme.colorScheme.primary
-        else -> MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
-    }
-
-    GlassCard {
+    MaleleCard {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -523,68 +560,98 @@ private fun JobStatusCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column {
+                    val isReady = audioReady || jobState == "completed"
                     Text(
-                        text = "Generating song",
+                        text = if (isReady) "Your song is ready" else "Generating song",
                         style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.colorScheme.onBackground,
                     )
                     Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = "Job ${jobId.take(8)}... · ${provider.ifBlank { "mock" }}",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
-                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Surface(
+                            shape = RoundedCornerShape(4.dp),
+                            color = Color.DarkGray,
+                        ) {
+                            Text(
+                                text = "MOCK",
+                                style = MaterialTheme.typography.labelLarge.copy(fontSize = 10.sp, color = Color.White),
+                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                            )
+                        }
+                        // Processing pill or completed badge
+                        if (isReady) {
+                            Surface(
+                                shape = RoundedCornerShape(50.dp),
+                                color = WovenYellow,
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                ) {
+                                    Icon(Icons.Filled.Check, contentDescription = null, tint = Color.Black, modifier = Modifier.size(12.dp))
+                                    Text(
+                                        text = "completed",
+                                        style = MaterialTheme.typography.labelLarge.copy(fontSize = 12.sp, color = Color.Black),
+                                    )
+                                }
+                            }
+                        } else {
+                            Surface(
+                                shape = RoundedCornerShape(50.dp),
+                                color = AfricanRed,
+                            ) {
+                                Text(
+                                    text = "processing",
+                                    style = MaterialTheme.typography.labelLarge.copy(fontSize = 12.sp, color = Color.White),
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                )
+                            }
+                        }
+                    }
                 }
-                if (isPolling) {
+                if (isPolling && !audioReady) {
                     CircularProgressIndicator(
-                        modifier = Modifier.height(24.dp).width(24.dp),
+                        modifier = Modifier.size(24.dp),
                         strokeWidth = 2.dp,
+                        color = AfricanRed,
                     )
                 }
             }
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(16.dp))
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "State: ",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-                )
-                Text(
-                    text = jobState,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = stateColor,
-                )
-            }
+            // Woven progress bar (filled a bit over half or based on state)
+            val progress = if (audioReady) 1f else 0.55f
+            WovenProgressBar(progress = progress)
+            Spacer(Modifier.height(16.dp))
 
             if (audioReady && audioUrl.isNotBlank()) {
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    text = "🎵 Your song is ready",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.secondary,
-                )
-                AudioPlayer(
+                Spacer(Modifier.height(8.dp))
+                com.benjakusa.malele.ui.components.AudioPlayer(
                     audioUrl = audioUrl,
                     authToken = authToken,
                 )
                 Spacer(Modifier.height(12.dp))
                 if (savedSongId != null) {
-                    Text(
-                        text = "✓ Saved to library",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.secondary,
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Icon(Icons.Filled.Check, contentDescription = null, tint = WovenYellow)
+                        Text(
+                            text = "Saved to library",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onBackground,
+                        )
+                    }
                 } else {
                     Button(
                         onClick = onSave,
                         enabled = !isSaving,
+                        colors = ButtonDefaults.buttonColors(containerColor = AfricanRed),
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         if (isSaving) {
-                            CircularProgressIndicator(modifier = Modifier.height(20.dp), strokeWidth = 2.dp)
+                            CircularProgressIndicator(modifier = Modifier.height(20.dp), strokeWidth = 2.dp, color = Color.White)
                         } else {
-                            Text("Save to library")
+                            Text("Save to library", color = Color.White)
                         }
                     }
                 }

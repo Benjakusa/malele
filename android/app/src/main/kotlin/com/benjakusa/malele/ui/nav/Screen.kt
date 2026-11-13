@@ -2,6 +2,7 @@ package com.benjakusa.malele.ui.nav
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Equalizer
 import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
@@ -16,8 +17,9 @@ sealed class Screen(
     data object Explore : Screen("explore", "Explore", Icons.Filled.Search)
     data object Library : Screen("library", "Library", Icons.Filled.LibraryMusic)
     data object Profile : Screen("profile", "Profile", Icons.Filled.Person)
+    data object Studio : Screen("studio", "Studio", Icons.Filled.Equalizer)
 
     companion object {
-        val tabs = listOf(Create, Explore, Library, Profile)
+        val tabs = listOf(Create, Library, Profile, Studio)
     }
 }

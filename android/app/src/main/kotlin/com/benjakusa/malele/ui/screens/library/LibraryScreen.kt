@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,74 +23,120 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.benjakusa.malele.data.network.dto.SongDto
+import com.benjakusa.malele.ui.components.MaleleCard
+import com.benjakusa.malele.ui.components.ThemeToggleButton
+import com.benjakusa.malele.ui.components.ThinWovenStrip
+import com.benjakusa.malele.ui.components.VinylRecord
+import com.benjakusa.malele.ui.theme.PureRed
 
 @Composable
 fun LibraryScreen(
-    onSongClick: (com.benjakusa.malele.data.network.dto.SongDto) -> Unit = {},
+    onSongClick: (SongDto) -> Unit = {},
     viewModel: LibraryViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier.fillMaxSize(),
     ) {
+        ThinWovenStrip()
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "Your library",
+                text = "Library",
                 style = MaterialTheme.typography.headlineLarge,
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.onBackground,
             )
-            TextButton(onClick = viewModel::refresh) {
-                Text("Refresh")
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                TextButton(onClick = viewModel::refresh) {
+                    Text("Refresh")
+                }
+                ThemeToggleButton()
             }
         }
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = "${state.songs.size} song${if (state.songs.size == 1) "" else "s"}",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
-        )
-        Spacer(Modifier.height(16.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+        ) {
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = "${state.songs.size} song${if (state.songs.size == 1) "" else "s"}",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+            )
+            Spacer(Modifier.height(16.dp))
 
-        when {
-            state.isLoading -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            when {
+                state.isLoading -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                    }
                 }
-            }
-            state.songs.isEmpty() -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                state.songs.isEmpty() -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        Box(
+                            modifier = Modifier.size(160.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Surface(
+                                modifier = Modifier
+                                    .size(110.dp)
+                                    .rotate(-10f),
+                                shape = RoundedCornerShape(16.dp),
+                                color = PureRed,
+                            ) {}
+                            Surface(
+                                modifier = Modifier
+                                    .size(110.dp)
+                                    .rotate(6f)
+                                    .shadow(8.dp, RoundedCornerShape(16.dp)),
+                                shape = RoundedCornerShape(16.dp),
+                                color = MaterialTheme.colorScheme.surface,
+                            ) {
+                                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    VinylRecord(modifier = Modifier.size(70.dp))
+                                }
+                            }
+                        }
+                        Spacer(Modifier.height(24.dp))
                         Text(
-                            text = "No songs yet",
+                            text = "Your songs will live here",
                             style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                            color = MaterialTheme.colorScheme.onBackground,
                         )
                         Spacer(Modifier.height(8.dp))
                         Text(
-                            text = "Generate a song on the Create tab and tap Save.",
+                            text = "Every song you generate is saved to your library, ready to replay, edit and share.",
                             style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                         )
                     }
                 }
-            }
-            else -> {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    items(state.songs, key = { it.id }) { song ->
-                        SongCard(song, onClick = { onSongClick(song) })
+                else -> {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.fillMaxSize(),
+                    ) {
+                        items(state.songs, key = { it.id }) { song ->
+                            SongCard(song, onClick = { onSongClick(song) })
+                        }
                     }
                 }
             }
@@ -99,27 +146,15 @@ fun LibraryScreen(
 
 @Composable
 private fun SongCard(song: SongDto, onClick: () -> Unit = {}) {
-    Surface(
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(
-                elevation = 8.dp,
-                shape = RoundedCornerShape(16.dp),
-                ambientColor = Color.Black.copy(alpha = 0.4f),
-                spotColor = Color.Black.copy(alpha = 0.6f),
-            ),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.55f),
-    ) {
+    MaleleCard(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = song.title,
                 style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.onBackground,
             )
             Spacer(Modifier.height(4.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 if (song.genre != null) {
                     Text(
                         text = "🎵 ${song.genre}",

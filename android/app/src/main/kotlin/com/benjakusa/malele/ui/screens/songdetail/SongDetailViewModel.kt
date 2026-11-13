@@ -1,11 +1,13 @@
 package com.benjakusa.malele.ui.screens.songdetail
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.benjakusa.malele.BuildConfig
 import com.benjakusa.malele.data.local.TokenStore
 import com.benjakusa.malele.data.repository.SongActions
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,14 +25,26 @@ data class SongDetailUiState(
 class SongDetailViewModel @Inject constructor(
     private val songActions: SongActions,
     private val tokenStore: TokenStore,
+    @ApplicationContext private val appContext: Context,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SongDetailUiState())
     val state: StateFlow<SongDetailUiState> = _state.asStateFlow()
 
-    fun audioUrl(jobId: String): String {
+    fun audioSource(jobId: String): String {
+        val local = songActions.localAudioFile(appContext, jobId)
+        if (local.exists() && local.length() > 0) {
+            return local.toURI().toString()
+        }
         val base = BuildConfig.BACKEND_URL.trimEnd('/')
         return "$base/v1/generations/$jobId/audio"
+    }
+
+    fun ensureLocalCopy(jobId: String, title: String) {
+        if (songActions.hasLocalAudio(appContext, jobId)) return
+        viewModelScope.launch {
+            songActions.persistForPlayback(appContext, jobId, title)
+        }
     }
 
     fun authToken(): String = tokenStore.getAccessToken() ?: ""

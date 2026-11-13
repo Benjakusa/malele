@@ -1,10 +1,17 @@
 package com.benjakusa.malele.ui.nav
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -12,7 +19,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -28,7 +40,10 @@ import com.benjakusa.malele.ui.screens.explore.ExploreScreen
 import com.benjakusa.malele.ui.screens.library.LibraryScreen
 import com.benjakusa.malele.ui.screens.profile.ProfileScreen
 import com.benjakusa.malele.ui.screens.songdetail.SongDetailScreen
-import javax.inject.Inject
+import com.benjakusa.malele.ui.screens.studio.StudioScreen
+import com.benjakusa.malele.ui.theme.AfricanRed
+import com.benjakusa.malele.ui.theme.LocalThemeState
+
 
 sealed class AuthScreen(val route: String) {
     data object Login : AuthScreen("auth/login")
@@ -49,7 +64,7 @@ fun MaleleNavHost(
     if (isLoggedIn == null) return
 
     if (isLoggedIn == true) {
-        MainNavGraph(onLogout = { /* handled by Profile screen in Phase 8 */ })
+        MainNavGraph(onLogout = { isLoggedIn = false })
     } else {
         AuthNavGraph(onAuthSuccess = { isLoggedIn = true })
     }
@@ -80,29 +95,83 @@ private fun AuthNavGraph(onAuthSuccess: () -> Unit) {
 @Composable
 private fun MainNavGraph(onLogout: () -> Unit) {
     val navController = rememberNavController()
+    val themeState = LocalThemeState.current
+    val isDark = themeState.isDark
+    val shadowColor = if (isDark) Color.White else Color.Black
+    val surfaceColor = MaterialTheme.colorScheme.background
+
     Scaffold(
         bottomBar = {
-            NavigationBar {
-                val backStackEntry by navController.currentBackStackEntryAsState()
-                val currentDestination = backStackEntry?.destination
-                Screen.tabs.forEach { tab ->
-                    val selected = currentDestination?.hierarchy?.any { it.route == tab.route } == true
-                    NavigationBarItem(
-                        selected = selected,
-                        onClick = {
-                            navController.navigate(tab.route) {
-                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(
+                        elevation = 16.dp,
+                        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                        ambientColor = shadowColor.copy(alpha = if (isDark) 0.25f else 0.15f),
+                        spotColor = shadowColor.copy(alpha = if (isDark) 0.35f else 0.25f),
+                    ),
+                color = surfaceColor,
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    val backStackEntry by navController.currentBackStackEntryAsState()
+                    val currentDestination = backStackEntry?.destination
+
+                    Screen.tabs.forEach { tab ->
+                        val selected = currentDestination?.hierarchy?.any { it.route == tab.route } == true
+                        if (selected) {
+                            Surface(
+                                shape = RoundedCornerShape(50.dp),
+                                color = AfricanRed,
+                                modifier = Modifier.height(40.dp),
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    Icon(
+                                        imageVector = tab.icon,
+                                        contentDescription = tab.label,
+                                        tint = Color.White,
+                                        modifier = Modifier.size(20.dp),
+                                    )
+                                    Text(
+                                        text = tab.label,
+                                        style = MaterialTheme.typography.labelLarge.copy(color = Color.White, fontWeight = FontWeight.Bold),
+                                    )
+                                }
                             }
-                        },
-                        icon = { Icon(tab.icon, contentDescription = tab.label) },
-                        label = { Text(tab.label) },
-                    )
+                        } else {
+                            IconButton(
+                                onClick = {
+                                    navController.navigate(tab.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                },
+                            ) {
+                                Icon(
+                                    imageVector = tab.icon,
+                                    contentDescription = tab.label,
+                                    tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
     ) { innerPadding ->
+
         NavHost(
             navController = navController,
             startDestination = Screen.Create.route,
@@ -139,7 +208,8 @@ private fun MainNavGraph(onLogout: () -> Unit) {
                     onBack = { navController.popBackStack() },
                 )
             }
-            composable(Screen.Profile.route) { ProfileScreen() }
+            composable(Screen.Profile.route) { ProfileScreen(onLogout = onLogout) }
+            composable(Screen.Studio.route) { StudioScreen() }
         }
     }
 }

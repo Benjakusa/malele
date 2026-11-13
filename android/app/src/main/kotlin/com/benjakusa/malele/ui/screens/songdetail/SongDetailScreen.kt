@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -17,16 +16,17 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.benjakusa.malele.ui.components.AudioPlayer
+import com.benjakusa.malele.ui.components.MaleleCard
+import com.benjakusa.malele.ui.components.ThemeToggleButton
 
 @Composable
 fun SongDetailScreen(
@@ -38,6 +38,10 @@ fun SongDetailScreen(
     viewModel: SongDetailViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
+
+    LaunchedEffect(jobId) {
+        viewModel.ensureLocalCopy(jobId, title)
+    }
     val context = LocalContext.current
 
     Surface(
@@ -50,7 +54,17 @@ fun SongDetailScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Spacer(Modifier.height(24.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                OutlinedButton(onClick = onBack) {
+                    Text("Back")
+                }
+                ThemeToggleButton()
+            }
+            Spacer(Modifier.height(16.dp))
             Text(
                 text = title,
                 style = MaterialTheme.typography.headlineLarge,
@@ -75,21 +89,10 @@ fun SongDetailScreen(
             }
             Spacer(Modifier.height(24.dp))
 
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .shadow(
-                        elevation = 12.dp,
-                        shape = RoundedCornerShape(24.dp),
-                        ambientColor = Color.Black.copy(alpha = 0.4f),
-                        spotColor = Color.Black.copy(alpha = 0.6f),
-                    ),
-                shape = RoundedCornerShape(24.dp),
-                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.55f),
-            ) {
+            MaleleCard {
                 Column(modifier = Modifier.padding(24.dp)) {
                     AudioPlayer(
-                        audioUrl = viewModel.audioUrl(jobId),
+                        audioUrl = viewModel.audioSource(jobId),
                         authToken = viewModel.authToken(),
                     )
                 }

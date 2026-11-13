@@ -1,17 +1,18 @@
 package com.benjakusa.malele.ui.screens.auth
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -22,11 +23,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.benjakusa.malele.ui.components.DiagonalImageHero
+import com.benjakusa.malele.ui.components.MaleleButton
+import com.benjakusa.malele.ui.components.MaleleTextField
+import com.benjakusa.malele.ui.components.ThemeToggleButton
 
 @Composable
 fun RegisterScreen(
@@ -43,79 +50,113 @@ fun RegisterScreen(
         onRegisterSuccess()
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding(),
     ) {
-        Text(
-            text = "Create your account",
-            style = MaterialTheme.typography.headlineLarge,
-            color = MaterialTheme.colorScheme.primary,
-        )
-        Spacer(Modifier.height(32.dp))
+        val screenHeight = maxHeight
+        val heroHeight = screenHeight * 0.43f
 
-        OutlinedTextField(
-            value = displayName,
-            onValueChange = { displayName = it; viewModel.clearError() },
-            label = { Text("Display name (optional)") },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Spacer(Modifier.height(12.dp))
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .imePadding(),
+            ) {
+                DiagonalImageHero(height = heroHeight)
 
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it; viewModel.clearError() },
-            label = { Text("Email") },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email,
-                imeAction = ImeAction.Next,
-            ),
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Spacer(Modifier.height(12.dp))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 16.dp),
+                ) {
+                    Text(
+                        text = "Malele",
+                        fontSize = 48.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = "Songs with an African heartbeat.",
+                        fontSize = 16.sp,
+                        fontStyle = FontStyle.Italic,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                    )
+                    Spacer(Modifier.height(24.dp))
 
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it; viewModel.clearError() },
-            label = { Text("Password (min 8 chars)") },
-            singleLine = true,
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Password,
-                imeAction = ImeAction.Done,
-            ),
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Spacer(Modifier.height(16.dp))
+                    Text(
+                        text = "Create your account",
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                    Spacer(Modifier.height(20.dp))
 
-        if (state.errorMessage != null) {
-            Text(
-                text = state.errorMessage!!,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyLarge,
-            )
-            Spacer(Modifier.height(8.dp))
-        }
+                    MaleleTextField(
+                        value = displayName,
+                        onValueChange = { displayName = it; viewModel.clearError() },
+                        label = "Display name (optional)",
+                        placeholder = "Benja",
+                    )
+                    Spacer(Modifier.height(16.dp))
 
-        Button(
-            onClick = { viewModel.register(email, password, displayName) },
-            enabled = !state.isLoading,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            if (state.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.height(20.dp), strokeWidth = 2.dp)
-            } else {
-                Text("Register")
+                    MaleleTextField(
+                        value = email,
+                        onValueChange = { email = it; viewModel.clearError() },
+                        label = "Email",
+                        placeholder = "you@example.com",
+                    )
+                    Spacer(Modifier.height(16.dp))
+
+                    MaleleTextField(
+                        value = password,
+                        onValueChange = { password = it; viewModel.clearError() },
+                        label = "Password (min 8 chars)",
+                        placeholder = "••••••••",
+                        visualTransformation = PasswordVisualTransformation(),
+                    )
+
+                    Spacer(Modifier.height(16.dp))
+
+                    if (state.errorMessage != null) {
+                        Text(
+                            text = state.errorMessage!!,
+                            color = MaterialTheme.colorScheme.error,
+                            fontSize = 14.sp,
+                        )
+                        Spacer(Modifier.height(8.dp))
+                    }
+
+                    MaleleButton(
+                        text = "Register",
+                        onClick = { viewModel.register(email, password, displayName) },
+                        isLoading = state.isLoading,
+                    )
+
+                    Spacer(Modifier.height(16.dp))
+
+                    TextButton(
+                        onClick = onNavigateToLogin,
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                    ) {
+                        Text(
+                            text = "Already have an account? Log in",
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                    Spacer(Modifier.height(32.dp))
+                }
             }
-        }
-        Spacer(Modifier.height(12.dp))
 
-        TextButton(onClick = onNavigateToLogin) {
-            Text("Already have an account? Log in")
+            ThemeToggleButton(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp),
+                tint = Color.White,
+            )
         }
     }
 }

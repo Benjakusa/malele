@@ -41,3 +41,6 @@ secrets/
 *.malele
 storage/
 uploads/
+
+*.bak
+android/PROGRESS.MD

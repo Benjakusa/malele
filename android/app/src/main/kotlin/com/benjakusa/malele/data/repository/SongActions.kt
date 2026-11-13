@@ -30,6 +30,15 @@ class SongActions @Inject constructor(
         return "$base/v1/generations/$jobId/audio"
     }
 
+    fun localAudioFile(context: Context, jobId: String): File {
+        val dir = File(context.filesDir, "audio")
+        if (!dir.exists()) dir.mkdirs()
+        return File(dir, "$jobId.wav")
+    }
+
+    fun hasLocalAudio(context: Context, jobId: String): Boolean =
+        localAudioFile(context, jobId).exists()
+
     suspend fun downloadToCache(jobId: String, title: String): File? = withContext(Dispatchers.IO) {
         try {
             val token = tokenStore.getAccessToken() ?: return@withContext null
@@ -47,6 +56,17 @@ class SongActions @Inject constructor(
         } catch (e: Exception) { null }
     }
 
+    suspend fun persistForPlayback(context: Context, jobId: String, title: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val dest = localAudioFile(context, jobId)
+            if (dest.exists()) return@withContext true
+            val file = downloadToCache(jobId, title) ?: return@withContext false
+            dest.outputStream().use { out -> file.inputStream().copyTo(out) }
+            file.delete()
+            true
+        } catch (e: Exception) { false }
+    }
+
     fun shareIntent(context: Context, file: File): Intent {
         val uri = FileProvider.getUriForFile(context, "${BuildConfig.APPLICATION_ID}.fileprovider", file)
         return Intent(Intent.ACTION_SEND).apply {
@@ -59,6 +79,13 @@ class SongActions @Inject constructor(
 
     suspend fun saveToDevice(context: Context, jobId: String, title: String): Uri? = withContext(Dispatchers.IO) {
         val file = downloadToCache(jobId, title) ?: return@withContext null
+        // Persist a private copy for in-app playback that survives backend restarts
+        try {
+            val privateFile = localAudioFile(context, jobId)
+            if (!privateFile.exists()) {
+                privateFile.outputStream().use { out -> file.inputStream().copyTo(out) }
+            }
+        } catch (e: Exception) { /* private copy failure shouldn't block the MediaStore save */ }
         try {
             val safeTitle = title.replace(Regex("[^a-zA-Z0-9_\\- ]"), "_").take(50)
             val fileName = "malele_$safeTitle.wav"

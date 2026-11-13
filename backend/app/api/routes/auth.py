@@ -120,3 +120,18 @@ async def logout(
 @me_router.get("/me", response_model=UserOut)
 async def me(user: Annotated[User, Depends(get_current_user)]) -> UserOut:
     return UserOut.model_validate(user)
+
+from app.schemas.auth import UpdateMeRequest
+
+
+@me_router.patch("/me", response_model=UserOut)
+async def update_me(
+    body: UpdateMeRequest,
+    user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> UserOut:
+    """Update current user's profile (display name)."""
+    if body.display_name is not None:
+        user.display_name = body.display_name
+        await db.flush()
+    return UserOut.model_validate(user)
