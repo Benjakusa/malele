@@ -39,6 +39,18 @@ async def enhance(
         )
     except AnthropicError as e:
         logger.error("prompt_enhance_failed", error=str(e)[:200])
+        err_text = str(e).lower()
+        if (
+            "402" in err_text
+            or "quota" in err_text
+            or "insufficient" in err_text
+            or "billing" in err_text
+            or "payment" in err_text
+        ):
+            raise PromptError(
+                "PROVIDER_OUT_OF_CREDITS",
+                "Malele's lyrics service is temporarily offline while we replenish credits.",
+            ) from e
         raise PromptError("PROMPT_ENHANCE_FAILED", str(e)[:200]) from e
 
     if not enhanced or len(enhanced) < 20:
@@ -70,6 +82,18 @@ async def generate_lyrics(
         )
     except AnthropicError as e:
         logger.error("lyrics_generate_failed", error=str(e)[:200])
+        err_text = str(e).lower()
+        if (
+            "402" in err_text
+            or "quota" in err_text
+            or "insufficient" in err_text
+            or "billing" in err_text
+            or "payment" in err_text
+        ):
+            raise PromptError(
+                "PROVIDER_OUT_OF_CREDITS",
+                "Malele's lyrics service is temporarily offline while we replenish credits.",
+            ) from e
         raise PromptError("LYRICS_GENERATE_FAILED", str(e)[:200]) from e
 
     return lyrics

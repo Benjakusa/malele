@@ -131,6 +131,20 @@ async def submit(
         ref: ProviderJobRef = await provider.submit(req)
     except Exception as e:
         await ledger.refund_reserved(db, job_id=job_id)
+        err_text = str(e).lower()
+        # Detect provider-side "out of credits" / payment failures across providers
+        if (
+            "402" in err_text
+            or "payment_required" in err_text
+            or "paid_plan_required" in err_text
+            or "quota_exceeded" in err_text
+            or "insufficient_quota" in err_text
+            or "insufficient credits" in err_text
+        ):
+            raise GenerationError(
+                "PROVIDER_OUT_OF_CREDITS",
+                "Malele's music generation service is temporarily offline while we replenish credits. Please try again in a few hours.",
+            ) from e
         raise GenerationError("PROVIDER_SUBMIT_FAILED", str(e)) from e
 
     job.provider = ref.provider.value

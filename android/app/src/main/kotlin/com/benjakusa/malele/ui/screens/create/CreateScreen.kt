@@ -85,6 +85,11 @@ fun CreateScreen(
     viewModel: CreateViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
+
+    CreditDialogs(
+        errorCode = state.errorCode,
+        onDismiss = { viewModel.clearError() },
+    )
     var showAudioSheet by remember { mutableStateOf(false) }
     var showVoiceSheet by remember { mutableStateOf(false) }
 
@@ -657,5 +662,45 @@ private fun JobStatusCard(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun CreditDialogs(
+    errorCode: String?,
+    onDismiss: () -> Unit,
+) {
+    when (errorCode) {
+        "CREDITS_INSUFFICIENT" -> androidx.compose.material3.AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { androidx.compose.material3.Text("Out of Credits") },
+            text = {
+                androidx.compose.material3.Text(
+                    "You've used all your generation credits. " +
+                    "Wait for your monthly refresh, or contact support to request more."
+                )
+            },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = onDismiss) {
+                    androidx.compose.material3.Text("OK")
+                }
+            },
+        )
+        "PROVIDER_OUT_OF_CREDITS" -> androidx.compose.material3.AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { androidx.compose.material3.Text("Service Temporarily Unavailable") },
+            text = {
+                androidx.compose.material3.Text(
+                    "Our music generation service is temporarily offline " +
+                    "while we replenish credits. Your work is saved. " +
+                    "Please try again in a few hours."
+                )
+            },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = onDismiss) {
+                    androidx.compose.material3.Text("OK")
+                }
+            },
+        )
     }
 }

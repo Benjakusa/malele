@@ -37,6 +37,7 @@ data class CreateUiState(
     val isLoading: Boolean = false,
     val submittedJob: JobDto? = null,
     val errorMessage: String? = null,
+    val errorCode: String? = null,
     val lyricsLoadingSectionId: String? = null,
     val jobState: String = "",
     val jobProvider: String = "",
@@ -259,6 +260,7 @@ class CreateViewModel @Inject constructor(
                 is GenerationResult.Error -> _state.value = _state.value.copy(
                     isLoading = false,
                     errorMessage = result.message,
+                    errorCode = result.code,
                 )
             }
         }
@@ -269,6 +271,6 @@ class CreateViewModel @Inject constructor(
     }
 
     fun clearError() {
-        _state.value = _state.value.copy(errorMessage = null)
+        _state.value = _state.value.copy(errorMessage = null, errorCode = null)
     }
 }
