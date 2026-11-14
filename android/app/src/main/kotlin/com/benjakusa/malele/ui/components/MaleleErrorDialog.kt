@@ -21,6 +21,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,6 +53,8 @@ fun MaleleErrorDialog(
     message: String,
     buttonText: String = "Got it",
     onDismiss: () -> Unit,
+    primaryActionLabel: String? = null,
+    onPrimaryAction: (() -> Unit)? = null,
 ) {
     Dialog(
         onDismissRequest = onDismiss,
@@ -116,10 +119,24 @@ fun MaleleErrorDialog(
                         textAlign = TextAlign.Center,
                     )
                     Spacer(Modifier.height(24.dp))
-                    MaleleButton(
-                        text = buttonText,
-                        onClick = onDismiss,
-                    )
+                    if (primaryActionLabel != null && onPrimaryAction != null) {
+                        MaleleButton(
+                            text = primaryActionLabel,
+                            onClick = onPrimaryAction,
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        TextButton(onClick = onDismiss) {
+                            Text(
+                                text = buttonText,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                            )
+                        }
+                    } else {
+                        MaleleButton(
+                            text = buttonText,
+                            onClick = onDismiss,
+                        )
+                    }
                 }
 
                 ThinWovenStrip()
