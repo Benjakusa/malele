@@ -12,11 +12,15 @@ from app.config.settings import get_settings
 
 settings = get_settings()
 
-_db_url = str(settings.DATABASE_URL)
+# Force psycopg driver for consistency across environments.
+# Render may auto-select asyncpg if both are installed; psycopg uses sslmode=require.
+_raw_url = str(settings.DATABASE_URL)
+_raw_url = _raw_url.replace("postgresql+asyncpg://", "postgresql+psycopg://")
+if _raw_url.startswith("postgresql://"):
+    _raw_url = _raw_url.replace("postgresql://", "postgresql+psycopg://", 1)
 
-# psycopg (the default driver for postgresql://) rejects the "ssl" parameter.
-# It expects "sslmode" instead. Strip invalid params from the URL and pass sslmode via connect_args.
-_parsed = make_url(_db_url)
+# Strip all libpq-style SSL query params; connect_args is the single source of truth.
+_parsed = make_url(_raw_url)
 _bad_keys = {"ssl", "sslmode", "channel_binding"}
 _clean_query = {k: v for k, v in _parsed.query.items() if k not in _bad_keys}
 _db_url = _parsed.set(query=_clean_query).render_as_string(hide_password=False)
