@@ -50,10 +50,20 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = ""
     OPENAI_IMAGE_MODEL: str = ""
 
-    CREDITS_SIGNUP_BONUS: int = 50
+    CREDITS_SIGNUP_BONUS: int = 10
     CREDITS_COST_PER_SONG: int = 10
     CREDITS_DAILY_MAX_PER_USER: int = 100
     CREDITS_DAILY_MAX_GLOBAL: int = 10000
+    CREDITS_PER_KES: float = 0.5  # KES 100 -> 50 credits
+
+    # --- M-Pesa (Daraja) ---
+    MPESA_ENV: Literal["sandbox", "production"] = "sandbox"
+    MPESA_CONSUMER_KEY: str = ""
+    MPESA_CONSUMER_SECRET: str = ""
+    MPESA_SHORTCODE: str = "174379"
+    MPESA_PASSKEY: str = ""
+    MPESA_CALLBACK_URL: str = "https://malele.onrender.com/v1/credits/callback"
+    MPESA_TRANSACTION_TYPE: str = "CustomerPayBillOnline"
 
     GENERATION_ENABLED: bool = True
     ELEVENLABS_ENABLED: bool = False

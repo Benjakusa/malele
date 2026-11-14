@@ -51,3 +51,28 @@ class CreditReservation(Base, UUIDMixin, TimestampMixin):
     amount: Mapped[int] = mapped_column(Integer, nullable=False)
     released_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     charged_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class CreditPurchase(Base, UUIDMixin, TimestampMixin):
+    """Tracks M-Pesa purchase intent and callback receipt. Prevents double-credit."""
+    __tablename__ = "credit_purchases"
+
+    user_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False, index=True,
+    )
+    checkout_request_id: Mapped[str] = mapped_column(
+        String(100), unique=True, index=True, nullable=False,
+    )
+    merchant_request_id: Mapped[str] = mapped_column(String(100), nullable=False)
+    mpesa_receipt: Mapped[str | None] = mapped_column(
+        String(50), unique=True, nullable=True, index=True,
+    )
+    phone: Mapped[str] = mapped_column(String(20), nullable=False)
+    amount_kes: Mapped[int] = mapped_column(nullable=False)
+    amount_credits: Mapped[int] = mapped_column(nullable=False)
+    status: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="pending", index=True,
+    )
+    result_code: Mapped[int | None] = mapped_column(nullable=True)
+    result_desc: Mapped[str | None] = mapped_column(String(255), nullable=True)

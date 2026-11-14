@@ -44,3 +44,5 @@ uploads/
 
 *.bak
 android/PROGRESS.MD
+*.bak-*
+*.bak.*
