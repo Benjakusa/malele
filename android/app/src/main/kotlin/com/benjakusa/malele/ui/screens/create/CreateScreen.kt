@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -23,12 +24,23 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Waves
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Piano
+import androidx.compose.material.icons.filled.GraphicEq
+import androidx.compose.material.icons.filled.Church
+import androidx.compose.material.icons.filled.Celebration
+import androidx.compose.material.icons.filled.SelfImprovement
+import androidx.compose.material.icons.filled.Nightlight
+import androidx.compose.material.icons.filled.Festival
+import androidx.compose.material.icons.automirrored.filled.QueueMusic
+import androidx.compose.material.icons.filled.Translate
+import androidx.compose.material.icons.filled.Public
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.benjakusa.malele.ui.components.ShadowChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -55,46 +67,82 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.benjakusa.malele.ui.components.MaleleButton
 import com.benjakusa.malele.ui.components.MaleleCard
 import com.benjakusa.malele.ui.components.ThemeToggleButton
-import com.benjakusa.malele.ui.components.ThinWovenStrip
 import com.benjakusa.malele.ui.components.WovenProgressBar
 import com.benjakusa.malele.ui.theme.AfricanRed
 import com.benjakusa.malele.ui.theme.PureRed
 import com.benjakusa.malele.ui.theme.WovenYellow
+import com.benjakusa.malele.ui.theme.maleleTextFieldColors
+import com.benjakusa.malele.ui.credits.CreditPill
+import com.benjakusa.malele.ui.credits.CreditsViewModel
+import com.benjakusa.malele.ui.credits.TopUpSheet
 import com.benjakusa.malele.ui.components.MaleleErrorDialog
 import com.benjakusa.malele.ui.components.ErrorDialogType
 
-data class Genre(val id: String, val label: String)
+data class Genre(
+    val id: String,
+    val label: String,
+    val icon: ImageVector,
+)
 
 val AFRICAN_GENRES = listOf(
-    Genre("benga", "Benga"),
-    Genre("rhumba", "Rhumba"),
-    Genre("soukous", "Soukous"),
-    Genre("gospel", "Gospel"),
-    Genre("afro-dance", "Afro-dance"),
-    Genre("reggae", "Reggae"),
-    Genre("slow-african", "Slow African"),
-    Genre("amapiano", "Amapiano"),
+    Genre("benga", "Benga", Icons.Filled.MusicNote),
+    Genre("rhumba", "Rhumba", Icons.Filled.Piano),
+    Genre("soukous", "Soukous", Icons.Filled.GraphicEq),
+    Genre("gospel", "Gospel", Icons.Filled.Church),
+    Genre("afro-dance", "Afro-dance", Icons.Filled.Celebration),
+    Genre("reggae", "Reggae", Icons.Filled.SelfImprovement),
+    Genre("slow-african", "Slow African", Icons.Filled.Nightlight),
+    Genre("amapiano", "Amapiano", Icons.Filled.Festival),
 )
 
 val LANGUAGES = listOf(
     "en" to "English",
     "sw" to "Swahili",
+    "luo" to "Dholuo",
+    "luhya" to "Luhya",
+    "kikuyu" to "Kikuyu",
+    "kamba" to "Kikamba",
+    "kisii" to "Ekegusii",
+    "meru" to "Kimeru",
+    "maasai" to "Maa",
+    "somali" to "Somali",
+    "taita" to "Kitaita",
+    "taveta" to "Kitaveta",
+    "mijikenda" to "Mijikenda",
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateScreen(
     viewModel: CreateViewModel = hiltViewModel(),
+    creditsViewModel: CreditsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
+    val creditsState by creditsViewModel.state.collectAsState()
+    var showTopUp by remember { mutableStateOf(false) }
+
+    if (showTopUp) {
+        TopUpSheet(
+            viewModel = creditsViewModel,
+            onDismiss = { showTopUp = false },
+        )
+    }
 
     state.errorCode?.let { code ->
         val (type, title, body) = errorDialogFor(code, state.errorMessage)
+        val isCredits = type == ErrorDialogType.CREDITS
         MaleleErrorDialog(
             type = type,
             title = title,
             message = body,
             onDismiss = { viewModel.clearError() },
+            primaryActionLabel = if (isCredits) "Top up" else null,
+            onPrimaryAction = if (isCredits) {
+                {
+                    viewModel.clearError()
+                    showTopUp = true
+                }
+            } else null,
         )
     }
     var showAudioSheet by remember { mutableStateOf(false) }
@@ -118,9 +166,6 @@ fun CreateScreen(
     Column(
         modifier = Modifier.fillMaxSize(),
     ) {
-        // Thin woven strip under status bar
-        ThinWovenStrip()
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -137,7 +182,17 @@ fun CreateScreen(
                     style = MaterialTheme.typography.headlineLarge,
                     color = MaterialTheme.colorScheme.onBackground,
                 )
-                ThemeToggleButton()
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    CreditPill(
+                        available = creditsState.available,
+                        isLoading = creditsState.isLoadingBalance,
+                        onClick = { showTopUp = true },
+                    )
+                    ThemeToggleButton()
+                }
             }
             Spacer(Modifier.height(16.dp))
 
@@ -175,7 +230,7 @@ fun CreateScreen(
                         onValueChange = viewModel::setPrompt,
                         placeholder = { Text("A Benga love song with interlocking guitars and warm vocals") },
                         modifier = Modifier.fillMaxWidth().height(120.dp),
-                        maxLines = 5,
+                        maxLines = 5, colors = maleleTextFieldColors(),
                     )
                 }
             }
@@ -184,11 +239,21 @@ fun CreateScreen(
             // Genre horizontal scroll
             MaleleCard {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Genre",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onBackground,
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.QueueMusic,
+                            contentDescription = null,
+                            tint = AfricanRed,
+                        )
+                        Text(
+                            text = "Genre",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onBackground,
+                        )
+                    }
                     Spacer(Modifier.height(8.dp))
                     Row(
                         modifier = Modifier
@@ -198,16 +263,13 @@ fun CreateScreen(
                     ) {
                         AFRICAN_GENRES.forEach { genre ->
                             val selected = state.genre == genre.id
-                            FilterChip(
+                            ShadowChip(
+                                label = genre.label,
+                                icon = genre.icon,
                                 selected = selected,
                                 onClick = {
                                     viewModel.setGenre(if (selected) null else genre.id)
                                 },
-                                label = { Text(genre.label) },
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = AfricanRed,
-                                    selectedLabelColor = Color.White,
-                                ),
                             )
                         }
                     }
@@ -215,69 +277,87 @@ fun CreateScreen(
             }
             Spacer(Modifier.height(16.dp))
 
-            // Vocals / Instrumental toggle
-            MaleleCard {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Vocals",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onBackground,
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        FilterChip(
-                            selected = state.vocals,
-                            onClick = { viewModel.setVocals(true) },
-                            label = { Text("Vocals") },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = AfricanRed,
-                                selectedLabelColor = Color.White,
-                            ),
-                        )
-                        FilterChip(
-                            selected = state.instrumental,
-                            onClick = { viewModel.setVocals(false) },
-                            label = { Text("Instrumental") },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = AfricanRed,
-                                selectedLabelColor = Color.White,
-                            ),
-                        )
+            // Vocals + Language — side by side
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(110.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                MaleleCard(modifier = Modifier.weight(0.38f).fillMaxHeight()) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Mic,
+                                contentDescription = null,
+                                tint = AfricanRed,
+                                modifier = Modifier.size(18.dp),
+                            )
+                            Text(
+                                text = "Vocals",
+                                style = MaterialTheme.typography.titleLarge.copy(fontSize = 16.sp),
+                                color = MaterialTheme.colorScheme.onBackground,
+                            )
+                        }
+                        Spacer(Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            ShadowChip(
+                                label = "Vocals",
+                                icon = Icons.Filled.Mic,
+                                selected = state.vocals,
+                                onClick = { viewModel.setVocals(true) },
+                            )
+                            ShadowChip(
+                                label = "Instrumental",
+                                icon = Icons.Filled.MusicNote,
+                                selected = state.instrumental,
+                                onClick = { viewModel.setVocals(false) },
+                            )
+                        }
                     }
                 }
-            }
-            Spacer(Modifier.height(16.dp))
-
-            // Language toggle
-            MaleleCard {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Language",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onBackground,
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        LANGUAGES.forEach { (code, label) ->
-                            FilterChip(
-                                selected = state.language == code,
-                                onClick = { viewModel.setLanguage(code) },
-                                label = { Text(label) },
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = AfricanRed,
-                                    selectedLabelColor = Color.White,
-                                ),
+                MaleleCard(modifier = Modifier.weight(0.62f).fillMaxHeight()) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Translate,
+                                contentDescription = null,
+                                tint = AfricanRed,
+                                modifier = Modifier.size(18.dp),
                             )
+                            Text(
+                                text = "Language",
+                                style = MaterialTheme.typography.titleLarge.copy(fontSize = 16.sp),
+                                color = MaterialTheme.colorScheme.onBackground,
+                            )
+                        }
+                        Spacer(Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            LANGUAGES.forEach { (code, label) ->
+                                ShadowChip(
+                                    label = label,
+                                    icon = if (code == "en") Icons.Filled.Public
+                                           else Icons.Filled.Translate,
+                                    selected = state.language == code,
+                                    onClick = { viewModel.setLanguage(code) },
+                                )
+                            }
                         }
                     }
                 }
@@ -413,7 +493,7 @@ private fun SectionEditor(
                     onValueChange = { newName -> onChange { it.copy(name = newName) } },
                     label = { Text("Section name") },
                     singleLine = true,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f), colors = maleleTextFieldColors(),
                 )
                 Spacer(Modifier.width(8.dp))
                 TextButton(onClick = onRemove) {
@@ -457,7 +537,7 @@ private fun SectionEditor(
                 label = { Text("Instruments") },
                 placeholder = { Text("heavy kick, congas, interlocking guitars, bass") },
                 maxLines = 2,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(), colors = maleleTextFieldColors(),
             )
             Spacer(Modifier.height(8.dp))
 
@@ -467,7 +547,7 @@ private fun SectionEditor(
                 label = { Text("Vocals") },
                 placeholder = { Text("warm male tenor, group harmonies") },
                 maxLines = 2,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(), colors = maleleTextFieldColors(),
             )
             Spacer(Modifier.height(8.dp))
 
@@ -477,7 +557,7 @@ private fun SectionEditor(
                 label = { Text("Mood") },
                 placeholder = { Text("anthemic, joyful, building") },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(), colors = maleleTextFieldColors(),
             )
             Spacer(Modifier.height(8.dp))
 
@@ -487,7 +567,7 @@ private fun SectionEditor(
                 label = { Text("What to avoid (optional)") },
                 placeholder = { Text("no auto-tune, no synth bass") },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(), colors = maleleTextFieldColors(),
             )
             Spacer(Modifier.height(16.dp))
 
@@ -539,7 +619,7 @@ private fun LyricsField(
         placeholder = { Text("Taa za jioni zinawaka, moyo wangu unarudi kwako...") },
         textStyle = MaterialTheme.typography.bodyMedium, // Italic serif for songbook page feel
         modifier = Modifier.fillMaxWidth().height(120.dp),
-        maxLines = 6,
+        maxLines = 6, colors = maleleTextFieldColors(),
     )
 }
 
@@ -673,7 +753,7 @@ private fun errorDialogFor(
         "CREDITS_INSUFFICIENT" -> Triple(
             ErrorDialogType.CREDITS,
             "Out of Credits",
-            "You've used all your generation credits. Wait for your monthly refresh, or contact support to request more.",
+            "You need credits to generate a song. Top up with M-Pesa to continue — it only takes a moment.",
         )
         "PROVIDER_OUT_OF_CREDITS" -> Triple(
             ErrorDialogType.SERVICE,
