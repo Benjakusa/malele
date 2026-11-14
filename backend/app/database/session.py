@@ -17,7 +17,7 @@ _db_url = str(settings.DATABASE_URL)
 # psycopg (the default driver for postgresql://) rejects the "ssl" parameter.
 # It expects "sslmode" instead. Strip invalid params from the URL and pass sslmode via connect_args.
 _parsed = make_url(_db_url)
-_bad_keys = {"ssl", "channel_binding"}
+_bad_keys = {"ssl", "sslmode", "channel_binding"}
 _clean_query = {k: v for k, v in _parsed.query.items() if k not in _bad_keys}
 _db_url = _parsed.set(query=_clean_query).render_as_string(hide_password=False)
 
