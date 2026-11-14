@@ -20,6 +20,7 @@ dependencies = [
     "argon2-cffi>=23.1",
     "boto3>=1.35",
     "static-ffmpeg>=3.0",
+    "daraja-sdk[fastapi]>=0.1.0",
     "python-multipart>=0.0.9",
     "structlog>=24.4",
 ]
