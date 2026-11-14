@@ -27,13 +27,17 @@ _db_url = _parsed.set(query=_clean_query).render_as_string(hide_password=False)
 
 _connect_args = {}
 if "localhost" not in _db_url and "127.0.0.1" not in _db_url:
-    _connect_args = {"sslmode": "require"}
+    _connect_args = {
+        "sslmode": "require",
+        "connect_timeout": 15,
+    }
 
 engine = create_async_engine(
     _db_url,
     echo=settings.APP_DEBUG,
-    pool_size=10,
-    max_overflow=20,
+    pool_size=3,
+    max_overflow=2,
+    pool_recycle=300,
     pool_pre_ping=True,
     connect_args=_connect_args,
 )

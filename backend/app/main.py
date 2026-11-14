@@ -1,3 +1,4 @@
+import asyncio
 import structlog
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
@@ -30,17 +31,47 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         generation_enabled=settings.GENERATION_ENABLED,
     )
 
-    # Ensure database schema exists (idempotent — safe to run on every boot).
-    # Temporary bridge until Alembic migrations are set up properly.
+    # Kick off schema creation in the background so a cold Neon database
+    # cannot block port binding (Render's port scanner has a short timeout).
+    schema_task = asyncio.create_task(_ensure_schema_ready())
+
+    yield
+
+    logger.info("malele_backend_shutdown")
+    if not schema_task.done():
+        schema_task.cancel()
+        try:
+            await schema_task
+        except (asyncio.CancelledError, Exception):
+            pass
+
+
+async def _ensure_schema_ready() -> None:
+    """Create DB schema if missing, retrying once on a cold-DB timeout.
+
+    Runs in the background so port binding is never blocked. A failure
+    here is logged but does NOT crash the app — Render's /health check
+    still responds, and the DB will be retried on the next deploy.
+    """
     from app.database.base import Base
     from app.database.session import engine
     import app.models.auth, app.models.jobs, app.models.songs, app.models.credits  # noqa: F401
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    logger.info("malele_database_schema_ready")
 
-    yield
-    logger.info("malele_backend_shutdown")
+    for attempt in range(1, 3):
+        try:
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+            logger.info("malele_database_schema_ready", attempt=attempt)
+            return
+        except Exception as exc:
+            logger.warning(
+                "malele_database_schema_failed",
+                attempt=attempt,
+                error=str(exc),
+            )
+            if attempt < 2:
+                await asyncio.sleep(3)
+    logger.error("malele_database_schema_gave_up")
 
 
 def create_app() -> FastAPI:
